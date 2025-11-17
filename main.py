@@ -11,11 +11,13 @@ from mbu_rpa_core.exceptions import BusinessError, ProcessError
 from mbu_rpa_core.process_states import CompletedState
 
 from helpers import ats_functions, config
+from helpers.context_handler import Scope
 from processes.application_handler import close, reset, startup
 from processes.error_handling import ErrorContext, handle_error
 from processes.finalize_process import finalize_process
 from processes.process_item import process_item
 from processes.queue_handler import concurrent_add, retrieve_items_for_queue
+from processes.sub_processes.clean_up import clean_up
 
 logger = logging.getLogger(__name__)
 
@@ -62,7 +64,13 @@ async def process_workqueue(workqueue: Workqueue):
 
                     try:
                         logger.info("Processing item with reference: %s", reference)
-                        process_item(data, reference)
+
+                        # Ensure all temp files are cleaned up before processing
+                        clean_up()
+
+                        # Process the item within a fresh context
+                        with Scope(fresh=True):
+                            process_item(data, reference)
 
                         completed_state = CompletedState.completed(
                             "Process completed without exceptions"
@@ -150,3 +158,7 @@ if __name__ == "__main__":
         asyncio.run(finalize(prod_workqueue))
 
     sys.exit(0)
+
+
+# TODO: How do I handle sys.args {"webformId": "valg_af_privat_tandklinik_som_le"}
+# or should it just get all active forms from the database?

@@ -6,7 +6,7 @@ import logging
 
 from automation_server_client import Workqueue
 
-from helpers import config
+import helpers.config as config
 
 logger = logging.getLogger(__name__)
 
@@ -97,3 +97,4 @@ async def concurrent_add(workqueue: Workqueue, items: list[dict]) -> None:
     logger.info(
         "Summary: %d succeeded, %d failed out of %d", successes, failures, len(results)
     )
+

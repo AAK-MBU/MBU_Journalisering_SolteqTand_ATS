@@ -1,6 +1,13 @@
 """Module for handling application startup, and close"""
 
 import logging
+import subprocess as sp
+from subprocess import CalledProcessError
+
+from mbu_dev_shared_components.solteqtand.application import SolteqTandApp
+
+import helpers.config as config
+from helpers.credential_constants import get_rpa_credentials
 
 APP = None
 logger = logging.getLogger(__name__)
@@ -17,32 +24,65 @@ def startup():
     """Function for starting applications"""
     logger.info("Starting applications...")
 
-    # This part adds the app to the global var after startup,
-    # and allows other files to use get_app() to get the app instance from the startup
-    # # ruff: noqa: PLW0603
-    # global APP
-    # APP = solteq_app
+    logger.info("Starting Solteq Tand application...")
+    try:
+        creds = get_rpa_credentials("solteq_tand_svcrpambu001")
+
+        application = SolteqTandApp(
+            app_path=config.APP_PATH,
+            username=creds["username"],
+            password=creds["decrypted_password"],
+        )
+        application.start_application()
+        application.login()
+
+        global APP  # ruff: noqa: PLW0602
+        APP = application
+    except Exception as e:
+        logger.error("Failed to start Solteq Tand application: %s", e)
+        raise
 
 
 def soft_close():
     """Function for closing applications softly"""
     logger.info("Closing applications softly...")
 
+    logger.info("Closing Solteq Tand application softly...")
+    application = get_app()
+    try:
+        application.close_solteq_tand()
+        logger.info("Closed application softly")
+    except Exception as e:
+        logger.error("Could not close application softly: %s", e)
 
-def hard_close():
+
+def hard_close(application: str):
     """Function for closing applications hard"""
-    logger.info("Closing applications hard...")
+    logger.info("Hard closing %s...", application)
+    list_processes = ["wmic", "process", "get", "description"]
+    if f"{application}" in sp.check_output(list_processes).strip().decode():
+        try:
+            kill_msg = sp.check_output(["taskkill", "/f", "/im", f"{application}"])
+            logger.info(kill_msg)
+        except CalledProcessError as e:
+            logger.error(
+                f"{application} found in subprocesses, but error while killing it: %s",
+                e,
+            )
 
 
 def close():
     """Function for closing applications softly or hardly if necessary"""
-    try:
+    solteq_app = get_app()
+    if solteq_app:
         soft_close()
-    except Exception:
-        hard_close()
+    solteq_app = get_app()
+    if solteq_app:
+        hard_close(application="TMTand.exe")
 
 
 def reset():
     """Function for resetting application"""
     close()
     startup()
+

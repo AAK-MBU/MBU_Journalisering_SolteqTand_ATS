@@ -1,13 +1,14 @@
 """Handler for fetching and updating dashboard data."""
 
+import datetime
 import logging
 import os
-from datetime import datetime, timezone
 
+# from datetime import datetime, timezone
 import requests
 from mbu_rpa_core.exceptions import BusinessError
 
-import helpers.config as config
+from helpers import config
 from helpers.context_handler import get_context_values
 
 logger = logging.getLogger(__name__)
@@ -173,7 +174,7 @@ def build_step_run_update(
 ) -> dict:
     """Builds the update data for a dashboard step run."""
     current_time = (
-        datetime.now(timezone.utc)
+        datetime.datetime.now(datetime.UTC)
         .isoformat(timespec="milliseconds")
         .replace("+00:00", "Z")
     )

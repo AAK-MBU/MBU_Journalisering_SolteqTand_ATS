@@ -6,7 +6,7 @@ import logging
 
 from automation_server_client import Workqueue
 
-import helpers.config as config
+from helpers import config
 
 logger = logging.getLogger(__name__)
 

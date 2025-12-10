@@ -35,7 +35,7 @@ exclude = [
 ]
 
 [tool.ruff.lint]
-ignore = ["E501", "E251"]
+ignore = ["PLW0602", "PLW0603", "E501", "E251"]
 select = [
   "F",    # Pyflakes
   "E",    # pycodestyle errors

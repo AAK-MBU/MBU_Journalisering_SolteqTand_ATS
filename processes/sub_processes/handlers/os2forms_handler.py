@@ -5,7 +5,7 @@ import os
 
 from mbu_dev_shared_components.os2forms.documents import download_file_bytes
 
-import helpers.config as config
+from helpers import config
 from helpers.context_handler import get_context_values, set_context_values
 from helpers.credential_constants import get_rpa_credentials
 
@@ -99,4 +99,3 @@ def get_os2forms_document():
     except Exception as e:
         logger.error("An unexpected error occurred during receipt download: %s", e)
         raise
-

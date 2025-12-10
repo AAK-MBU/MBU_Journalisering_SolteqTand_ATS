@@ -6,16 +6,17 @@ from subprocess import CalledProcessError
 
 from mbu_dev_shared_components.solteqtand.application import SolteqTandApp
 
-import helpers.config as config
+from helpers import config
 from helpers.credential_constants import get_rpa_credentials
 
-APP = None
 logger = logging.getLogger(__name__)
+
+APP: SolteqTandApp | None = None
 
 
 def get_app():
     """Function to get the application instance"""
-    # ruff: noqa: PLW0602
+    # noqa: PLW0602, PLW0603
     global APP
     return APP
 
@@ -36,7 +37,8 @@ def startup():
         application.start_application()
         application.login()
 
-        global APP  # ruff: noqa: PLW0602
+        # noqa: PLW0602, PLW0603
+        global APP
         APP = application
     except Exception as e:
         logger.error("Failed to start Solteq Tand application: %s", e)
@@ -85,4 +87,3 @@ def reset():
     """Function for resetting application"""
     close()
     startup()
-

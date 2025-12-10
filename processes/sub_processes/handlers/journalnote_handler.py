@@ -5,7 +5,7 @@ import time
 
 from mbu_dev_shared_components.solteqtand.database import SolteqTandDatabase
 
-import helpers.config as config
+from helpers import config
 from helpers.context_handler import get_context_values
 from helpers.credential_constants import get_rpa_constant
 from processes.application_handler import get_app

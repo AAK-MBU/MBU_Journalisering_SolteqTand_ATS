@@ -60,17 +60,21 @@ async def process_workqueue(workqueue: Workqueue):
         for item in workqueue:
             try:
                 with item:
-                    data, reference = ats_functions.get_item_info(item)
+                    item_data, item_reference, item_id = ats_functions.get_item_info(
+                        item
+                    )
 
                     try:
-                        logger.info("Processing item with reference: %s", reference)
+                        logger.info(
+                            "Processing item with reference: %s", item_reference
+                        )
 
                         # Ensure all temp files are cleaned up before processing
                         clean_up()
 
                         # Process the item within a fresh context
                         with Scope(fresh=True):
-                            process_item(data, reference)
+                            process_item(item_data, item_reference, item_id)
 
                         completed_state = CompletedState.completed(
                             "Process completed without exceptions"
@@ -158,7 +162,3 @@ if __name__ == "__main__":
         asyncio.run(finalize(prod_workqueue))
 
     sys.exit(0)
-
-
-# TODO: How do I handle sys.args {"webformId": "valg_af_privat_tandklinik_som_le"}
-# or should it just get all active forms from the database?

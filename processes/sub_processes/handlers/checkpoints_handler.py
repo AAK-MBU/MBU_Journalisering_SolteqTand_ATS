@@ -2,10 +2,13 @@
 
 import logging
 
+from mbu_dev_shared_components.solteqtand.database import SolteqTandDatabase
 from mbu_rpa_core.exceptions import BusinessError, ProcessError
 
 from helpers.config import DASHBOARD_STEP_6_NAME, DASHBOARD_STEP_7_NAME
 from helpers.context_handler import get_context_values
+from helpers.credential_constants import get_rpa_constant
+from processes.application_handler import get_app
 from processes.sub_processes.handlers.dashboard_data_handler import (
     check_if_clinic_data_match,
     update_dashboard_step_run,
@@ -49,6 +52,7 @@ def check_clinic_data_and_consent():
             step_name=DASHBOARD_STEP_7_NAME,
             status="failed",
             failure=str(be),
+            rerun=True,
         )
         raise
     except Exception as e:
@@ -57,6 +61,7 @@ def check_clinic_data_and_consent():
             step_name=DASHBOARD_STEP_7_NAME,
             status="failed",
             failure=str(e),
+            rerun=True,
         )
         raise ProcessError(
             "An error occurred while checking clinic data and consent."
@@ -64,15 +69,43 @@ def check_clinic_data_and_consent():
 
 
 def validate_contractor():
-    """Validate contractor in SolteqTand database"""
+    """Validate contractor in SolteqTand database and update contractor if exists."""
     try:
         # Update dashboard to indicate step is running
         update_dashboard_step_run(step_name=DASHBOARD_STEP_6_NAME, status="running")
 
+        solteq_app = get_app()
+        if solteq_app is None:
+            raise ValueError("Could not get application instance.")
+
         contractor_in_database = check_if_clinic_is_in_database()
 
-        # FOR TESTING PURPOSES
-        contractor_in_database = False
+        # Check if contractor is set on patient in Solteq Tand
+        solteq_db_conn = get_rpa_constant("srvapptmtsql03_connection_string")
+        solteq_db_obj = SolteqTandDatabase(conn_str=solteq_db_conn)
+        filters = {
+            "p.cpr": get_context_values("cpr"),
+        }
+        current_extern_dentist_data = solteq_db_obj.get_list_of_extern_dentist(
+            filters=filters
+        )
+        new_contractor_id = get_context_values("private_clinic_data")[0].get(
+            "contractorId", []
+        )
+        new_contractor_phone_number = get_context_values("private_clinic_data")[0].get(
+            "phoneNumber", []
+        )
+
+        if contractor_in_database and (
+            current_extern_dentist_data[0]["contractorId"] != new_contractor_id
+            or current_extern_dentist_data[0]["phoneNumber"]
+            != new_contractor_phone_number
+        ):
+            solteq_app.change_private_clinic(
+                private_clinic=get_context_values("private_clinic_data")[0].get(
+                    "name", []
+                )
+            )
 
         if not contractor_in_database:
             contractor_lookup_error = {
@@ -104,6 +137,7 @@ def validate_contractor():
             step_name=DASHBOARD_STEP_6_NAME,
             status="failed",
             failure=be,
+            rerun=True,
         )
         raise
     except Exception as e:
@@ -112,6 +146,7 @@ def validate_contractor():
             step_name=DASHBOARD_STEP_6_NAME,
             status="failed",
             failure=e,
+            rerun=True,
         )
         raise ProcessError(
             "An error occurred while validating contractor in SolteqTand database."

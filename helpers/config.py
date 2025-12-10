@@ -39,5 +39,5 @@ JOURNAL_NOTE_CONSENT_MESSAGE = (
 DASHBOARD_PROCESS_NAME = "Udskrivning 22 år"
 DASHBOARD_STEP_4_NAME = "Formular indsendt"
 DASHBOARD_STEP_5_NAME = "Formular journaliseret"
-DASHBOARD_STEP_6_NAME = "Tandklinik registreret i Solteq Tand"
+DASHBOARD_STEP_6_NAME = "Tandklinik registreret i Solteq"
 DASHBOARD_STEP_7_NAME = "Samtykke"

@@ -5,6 +5,7 @@ import os
 from datetime import datetime, timezone
 
 import requests
+from mbu_rpa_core.exceptions import BusinessError
 
 import helpers.config as config
 from helpers.context_handler import get_context_values
@@ -27,7 +28,7 @@ def get_dashboard_process_data() -> dict:
         requests.RequestException: For any errors during the API request.
     """
     try:
-        cpr = "1110109996"  # get_context_values("cpr")
+        cpr = get_context_values("cpr")
         if not cpr:
             raise ValueError("CPR number not found in context values.")
 
@@ -156,7 +157,7 @@ def update_dashboard_step_run_by_id(
 
         response = requests.patch(
             f"{endpoint}/step-runs/{step_run_id}",
-            headers=headers,
+            headers={**headers, "Accept-Charset": "utf-8"},
             json=update_data,
             timeout=30,
         )
@@ -167,32 +168,57 @@ def update_dashboard_step_run_by_id(
         raise
 
 
-def build_step_run_update(status: str, failure: Exception | None = None) -> dict:
+def build_step_run_update(
+    status: str, failure: Exception | None = None, rerun: bool = False
+) -> dict:
     """Builds the update data for a dashboard step run."""
     current_time = (
         datetime.now(timezone.utc)
         .isoformat(timespec="milliseconds")
         .replace("+00:00", "Z")
     )
+
+    # Determine failure content based on exception type
+    failure_data = None
+    if failure:
+        if isinstance(failure, BusinessError):
+            # For BusinessError, use the exception details as-is
+            failure_data = {
+                "error_code": type(failure).__name__,
+                "message": str(failure),
+                "details": str(failure.__traceback__)
+                if failure.__traceback__
+                else None,
+            }
+        else:
+            # For all other exceptions, use predefined error message
+            failure_data = {
+                "message": "Processen er fejlet",
+                "code": (
+                    "Digitalisering er i gang med at undersøge fejlen og genstarte processen.\n\n"
+                    "Kontakt Digitalisering, hvis fejlen ikke er rettet efter 2 arbejdsdage."
+                ),
+            }
+
+    # Rerun configuration
+    rerun_data = {}
+    if rerun:
+        rerun_data = {
+            "workitem_id": f"{get_context_values('work_item')}",
+        }
+
     update_data = {
         "status": status,
         "started_at": current_time,
         "finished_at": current_time,
-        "failure": {
-            "error_code": type(failure).__name__ if failure else None,
-            "message": str(failure) if failure else None,
-            "details": str(failure.__traceback__)
-            if failure and failure.__traceback__
-            else None,
-        }
-        if failure
-        else None,
+        "failure": failure_data,
+        "rerun_config": rerun_data,
     }
     return update_data
 
 
 def update_dashboard_step_run(
-    step_name: str, status: str, failure: Exception | None = None
+    step_name: str, status: str, failure: Exception | None = None, rerun: bool = False
 ) -> None:
     """Update dashboard step run status for a given step name and status."""
     logger.info("Updating dashboard step run: %s to status: %s", step_name, status)
@@ -203,7 +229,7 @@ def update_dashboard_step_run(
         api_context=get_context_values("api_context"),
     )
     logger.info("Step run ID for step '%s': %s", step_name, step_run_id)
-    update_data = build_step_run_update(status=status, failure=failure)
+    update_data = build_step_run_update(status=status, failure=failure, rerun=rerun)
     logger.info("Update data prepared: %s", update_data)
     update_dashboard_step_run_by_id(
         step_run_id=step_run_id,
@@ -253,3 +279,54 @@ def check_if_clinic_data_match() -> bool:
         raise RuntimeError(
             f"An error occurred while checking clinic data match: {exc}"
         ) from exc
+
+
+def update_process_run_metadata(item_data: dict) -> dict:
+    """Update process run metadata with clinic phone number and dispatch ID"""
+    process_run_metadata = {}
+    phone = item_data.get("klinik_telefonnummer", "")
+    ydernummer = item_data.get("klinik_ydernummer", "")
+
+    if phone:
+        process_run_metadata["new_clinic_phone_number"] = phone
+    if ydernummer:
+        process_run_metadata["new_clinic_ydernummer"] = ydernummer
+
+    logger.info("Updating process run metadata: %s", process_run_metadata)
+
+    api_context = get_context_values("api_context")
+    endpoint = api_context["endpoint"]
+    headers = api_context["headers"]
+    HTTP_STATUS_OK = 200
+
+    process_id = get_dashboard_process_id(config.DASHBOARD_PROCESS_NAME, api_context)
+    if not process_id:
+        logger.error("Process ID not found for process name")
+        raise RuntimeError("Process ID not found for process name.")
+
+    process_run_id = get_dashboard_run_id(
+        process_id=process_id,
+        cpr=get_context_values("cpr"),
+        api_context=get_context_values("api_context"),
+    )
+
+    if not process_run_id:
+        logger.error("Process run ID not found")
+        raise RuntimeError("Process run ID not found.")
+
+    response = requests.patch(
+        url=(f"{endpoint}/runs/{process_run_id}/metadata"),
+        json={"meta": process_run_metadata},
+        headers=headers,
+        timeout=10,
+    )
+
+    if response.status_code != HTTP_STATUS_OK:
+        logger.error(
+            "Failed to update process run metadata. Status code: %s, Response: %s",
+            response.status_code,
+            response.text,
+        )
+        raise RuntimeError("Failed to update process run metadata.")
+
+    return response.json()

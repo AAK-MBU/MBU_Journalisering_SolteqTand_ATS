@@ -97,4 +97,3 @@ async def concurrent_add(workqueue: Workqueue, items: list[dict]) -> None:
     logger.info(
         "Summary: %d succeeded, %d failed out of %d", successes, failures, len(results)
     )
-

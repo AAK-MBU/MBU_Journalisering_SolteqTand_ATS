@@ -8,6 +8,9 @@ import helpers.config as config
 from helpers.context_handler import get_context_values
 from helpers.credential_constants import get_rpa_constant
 from processes.application_handler import get_app
+from processes.sub_processes.handlers.dashboard_data_handler import (
+    update_dashboard_step_run,
+)
 from processes.sub_processes.handlers.journalizing_db_handler import (
     update_process_status,
     update_response_metadata,
@@ -69,6 +72,11 @@ def journalize_document():
             step_name="Document", json_fragment={"DocumentCreated": False}
         )
         update_process_status("Failed")
+        update_dashboard_step_run(
+            step_name=config.DASHBOARD_STEP_5_NAME,
+            status="failed",
+            failure=e,
+            rerun=True,
+        )
         logger.error("Error journalizing document: %s", e)
         raise RuntimeError("Error journalizing document: " + str(e)) from e
-

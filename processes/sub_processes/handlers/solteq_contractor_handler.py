@@ -31,15 +31,6 @@ def check_if_clinic_is_in_database() -> bool:
             "contractorId": get_context_values("clinic_provider_number"),
         }
 
-        # filters = {
-        #     k: v
-        #     for k, v in {
-        #         "phoneNumber": get_context_values("clinic_phone_number"),
-        #         "contractorId": get_context_values("clinic_provider_number"),
-        #     }.items()
-        #     if v
-        # }
-
         result = database.get_list_of_clinics(or_filters=[filters])
         set_context_values(private_clinic_data=result)
 

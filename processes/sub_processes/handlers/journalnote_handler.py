@@ -1,6 +1,7 @@
 """Module to handle journal note creation in SolteqTand"""
 
 import logging
+import time
 
 from mbu_dev_shared_components.solteqtand.database import SolteqTandDatabase
 
@@ -8,6 +9,9 @@ import helpers.config as config
 from helpers.context_handler import get_context_values
 from helpers.credential_constants import get_rpa_constant
 from processes.application_handler import get_app
+from processes.sub_processes.handlers.dashboard_data_handler import (
+    update_dashboard_step_run,
+)
 from processes.sub_processes.handlers.journalizing_db_handler import (
     update_process_status,
     update_response_metadata,
@@ -45,6 +49,8 @@ def create_journalnote():
                 checkmark_in_complete=True,
             )
 
+            time.sleep(3)  # Wait for the journal note to be created
+
             check_journal_note_created = solteq_db_obj.get_list_of_journal_notes(
                 filters=filters
             )
@@ -62,6 +68,11 @@ def create_journalnote():
             step_name="JournalNote", json_fragment={"JournalNoteCreated": False}
         )
         update_process_status("Failed")
+        update_dashboard_step_run(
+            step_name=config.DASHBOARD_STEP_5_NAME,
+            status="failed",
+            failure=e,
+            rerun=True,
+        )
         logger.error("Error creating journal note: %s", e)
         raise RuntimeError("Error creating journal note: " + str(e)) from e
-

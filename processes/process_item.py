@@ -25,7 +25,7 @@ from processes.sub_processes.handlers.journalizing_db_handler import (
 )
 from processes.sub_processes.handlers.journalnote_handler import create_journalnote
 from processes.sub_processes.handlers.os2forms_handler import get_os2forms_document
-from processes.sub_processes.set_context import set_context_vars
+from processes.sub_processes.init_set_context import set_context_vars
 
 logger = logging.getLogger(__name__)
 

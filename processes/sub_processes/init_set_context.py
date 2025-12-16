@@ -9,8 +9,8 @@ def set_context_vars(item_data: dict, item_reference: str, item_id: str):
     """Set context values based on item data"""
     api_context = {
         "endpoint": os.environ.get("DASHBOARD_API_URL"),
-        "api_key": os.environ.get("DASHBOARD_API_KEY"),
-        "headers": {"X-API-Key": os.environ.get("DASHBOARD_API_KEY")},
+        "api_key": os.environ.get("API_ADMIN_TOKEN"),
+        "headers": {"X-API-Key": os.environ.get("API_ADMIN_TOKEN")},
     }
     set_context_values(
         url=item_data.get("url", ""),

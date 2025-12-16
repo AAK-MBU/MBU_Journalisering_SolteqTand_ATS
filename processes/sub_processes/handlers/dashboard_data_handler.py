@@ -4,7 +4,6 @@ import datetime
 import logging
 import os
 
-# from datetime import datetime, timezone
 import requests
 from mbu_rpa_core.exceptions import BusinessError
 
@@ -14,7 +13,6 @@ from helpers.context_handler import get_context_values
 logger = logging.getLogger(__name__)
 
 
-# TODO: Change to get API key from database
 def get_dashboard_process_data() -> dict:
     """
     Fetches dashboard data from an external API using the CPR number from context values.
@@ -39,9 +37,9 @@ def get_dashboard_process_data() -> dict:
 
         url = f"{base_endpoint}/runs/?process_id=1&meta_filter=cpr:{cpr}&order_by=created_at&sort_direction=desc"
 
-        api_key = os.environ.get("DASHBOARD_API_KEY")
+        api_key = os.environ.get("API_ADMIN_TOKEN")
         if not api_key:
-            raise ValueError("DASHBOARD_API_KEY environment variable not set.")
+            raise ValueError("API_ADMIN_TOKEN environment variable not set.")
 
         response = requests.get(url=url, headers={"x-api-key": api_key}, timeout=30)
         response.raise_for_status()

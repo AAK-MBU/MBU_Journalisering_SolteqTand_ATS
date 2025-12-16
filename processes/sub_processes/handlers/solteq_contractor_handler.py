@@ -23,7 +23,7 @@ def check_if_clinic_is_in_database() -> bool:
     try:
         logger.info("Checking if clinic exists in the SolteqTand database.")
         database = SolteqTandDatabase(
-            os.environ.get("SOLTEQTANDDBCONNECTIONSTRING", "")
+            os.environ.get("DBCONNECTIONSTRINGSOLTEQTAND", "")
         )
 
         filters = {

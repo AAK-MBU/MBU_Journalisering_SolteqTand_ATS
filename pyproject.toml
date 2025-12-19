@@ -1,6 +1,6 @@
 [project]
 name = "mbu-journalisering-solteqtand-ats"
-version = "0.1.0"
+version = "0.1.1"
 description = "Journaliseringsmodul til Solteq Tand ATS"
 tags = ["ats"]
 readme = "README.md"

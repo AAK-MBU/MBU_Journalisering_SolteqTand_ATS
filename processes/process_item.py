@@ -10,7 +10,7 @@ from helpers.config import (
 )
 from helpers.context_handler import get_context_values
 from processes.application_handler import close, get_app
-from processes.sub_processes.clean_up import clean_up
+from processes.sub_processes.clean_up import clean_up, release_keys
 from processes.sub_processes.handlers.checkpoints_handler import (
     check_clinic_data_and_consent,
     validate_contractor,
@@ -33,6 +33,8 @@ logger = logging.getLogger(__name__)
 def process_item(item_data: dict, item_reference: str, item_id: str):
     """Function to handle item processing"""
     try:
+        release_keys()
+
         # Set context variables for further processing
         set_context_vars(item_data, item_reference, item_id)
 

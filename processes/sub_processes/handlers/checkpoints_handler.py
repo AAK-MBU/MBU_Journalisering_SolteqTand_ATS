@@ -101,16 +101,6 @@ def validate_contractor():
 
         logger.info("Contractor in database: %s", contractor_in_database)
         logger.info("Current extern dentist data: %s", current_extern_dentist_data)
-        logger.info(
-            "Check %s",
-            contractor_in_database
-            and current_extern_dentist_data
-            and (
-                current_extern_dentist_data[0]["contractorId"] != new_contractor_id
-                or current_extern_dentist_data[0]["phoneNumber"]
-                != new_contractor_phone_number
-            ),
-        )
 
         current_contractor_id = (
             current_extern_dentist_data[0]["contractorId"]
@@ -121,6 +111,15 @@ def validate_contractor():
             current_extern_dentist_data[0]["phoneNumber"]
             if current_extern_dentist_data
             else ""
+        )
+
+        logger.info(
+            "Check %s",
+            contractor_in_database
+            and (
+                current_contractor_id != new_contractor_id
+                or current_contractor_phone_number != new_contractor_phone_number
+            ),
         )
 
         if contractor_in_database and (

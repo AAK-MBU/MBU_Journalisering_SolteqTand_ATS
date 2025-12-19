@@ -112,14 +112,20 @@ def validate_contractor():
             ),
         )
 
-        if (
-            contractor_in_database
-            and current_extern_dentist_data is None
-            and (
-                current_extern_dentist_data[0]["contractorId"] != new_contractor_id
-                or current_extern_dentist_data[0]["phoneNumber"]
-                != new_contractor_phone_number
-            )
+        current_contractor_id = (
+            current_extern_dentist_data[0]["contractorId"]
+            if current_extern_dentist_data
+            else ""
+        )
+        current_contractor_phone_number = (
+            current_extern_dentist_data[0]["phoneNumber"]
+            if current_extern_dentist_data
+            else ""
+        )
+
+        if contractor_in_database and (
+            current_contractor_id != new_contractor_id
+            or current_contractor_phone_number != new_contractor_phone_number
         ):
             solteq_app.change_private_clinic(
                 private_clinic=get_context_values("private_clinic_data")[0].get(

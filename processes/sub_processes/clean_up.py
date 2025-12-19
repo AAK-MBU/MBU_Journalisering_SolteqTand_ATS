@@ -1,5 +1,6 @@
 """Module for cleaning up temporary folder after processing"""
 
+import ctypes
 import logging
 import os
 import shutil
@@ -29,8 +30,6 @@ def release_keys() -> None:
 
     logger.info("Releasing Ctrl, Alt, and Shift keys.")
     # pylint: disable-next = import-outside-toplevel
-    import ctypes
-
     try:
         # Use Windows API to release keys
         user32 = ctypes.windll.user32

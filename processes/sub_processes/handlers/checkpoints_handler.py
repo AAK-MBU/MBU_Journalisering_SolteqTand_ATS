@@ -95,6 +95,22 @@ def validate_contractor():
         new_contractor_phone_number = get_context_values("private_clinic_data")[0].get(
             "phoneNumber", []
         )
+        logger.info("Current extern dentist data: %s", current_extern_dentist_data)
+        logger.info("New contractor ID: %s", new_contractor_id)
+        logger.info("New contractor phone number: %s", new_contractor_phone_number)
+
+        logger.info("Contractor in database: %s", contractor_in_database)
+        logger.info("Current extern dentist data: %s", current_extern_dentist_data)
+        logger.info(
+            "Check %s",
+            contractor_in_database
+            and current_extern_dentist_data
+            and (
+                current_extern_dentist_data[0]["contractorId"] != new_contractor_id
+                or current_extern_dentist_data[0]["phoneNumber"]
+                != new_contractor_phone_number
+            ),
+        )
 
         if (
             contractor_in_database
@@ -124,6 +140,7 @@ def validate_contractor():
             logger.warning("Contractor not found in SolteqTand database.")
             raise BusinessError(contractor_lookup_error["message"])
 
+        logger.info("%s", get_context_values("private_clinic_data"))
         if len(get_context_values("private_clinic_data")) > 1:
             contractor_lookup_more_than_one_error = {
                 "type": "BusinessError",

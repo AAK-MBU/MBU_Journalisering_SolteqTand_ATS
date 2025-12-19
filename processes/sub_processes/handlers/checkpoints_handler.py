@@ -114,7 +114,7 @@ def validate_contractor():
 
         if (
             contractor_in_database
-            and current_extern_dentist_data
+            and current_extern_dentist_data is None
             and (
                 current_extern_dentist_data[0]["contractorId"] != new_contractor_id
                 or current_extern_dentist_data[0]["phoneNumber"]

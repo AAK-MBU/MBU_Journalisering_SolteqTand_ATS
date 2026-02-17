@@ -68,6 +68,17 @@ def check_clinic_data_and_consent():
         ) from e
 
 
+def _more_than_one_clinic_found_error():
+    error_message = {
+        "type": "BusinessError",
+        "message": "Telefonnummeret matcher flere klinikker i Solteq.",
+    }
+    logger.error(
+        "Multiple clinics found in SolteqTand database for the given phone number."
+    )
+    raise BusinessError(error_message["message"])
+
+
 def validate_contractor():
     """Validate contractor in SolteqTand database and update contractor if exists."""
     try:
@@ -89,6 +100,18 @@ def validate_contractor():
         current_extern_dentist_data = solteq_db_obj.get_list_of_extern_dentist(
             filters=filters
         )
+
+        # Raise error if more than one clinic is found with the same phone number in the database
+        logger.info("Current extern dentist data: %s", current_extern_dentist_data)
+        if len(current_extern_dentist_data) > 1:
+            _more_than_one_clinic_found_error()
+
+        logger.info(
+            "Private clinic data: %s", get_context_values("private_clinic_data")
+        )
+        if len(get_context_values("private_clinic_data")) > 1:
+            _more_than_one_clinic_found_error()
+
         new_contractor_id = get_context_values("private_clinic_data")[0].get(
             "contractorId", []
         )
@@ -142,19 +165,8 @@ def validate_contractor():
                 Du kan genstarte processen, når klinikken er oprettet eller dens oplysninger er rettet i Solteq.
                 """,
             }
-            logger.warning("Contractor not found in SolteqTand database.")
+            logger.error("Contractor not found in SolteqTand database.")
             raise BusinessError(contractor_lookup_error["message"])
-
-        logger.info("%s", get_context_values("private_clinic_data"))
-        if len(get_context_values("private_clinic_data")) > 1:
-            contractor_lookup_more_than_one_error = {
-                "type": "BusinessError",
-                "message": "Telefonnummeret matcher flere klinikker i Solteq.",
-            }
-            logger.warning(
-                "Multiple clinics found in SolteqTand database for the given phone number."
-            )
-            raise BusinessError(contractor_lookup_more_than_one_error["message"])
 
         update_dashboard_step_run(step_name=DASHBOARD_STEP_6_NAME, status="success")
     except BusinessError as be:

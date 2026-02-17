@@ -59,11 +59,23 @@ def get_dashboard_process_id(process_name: str, api_context: dict) -> dict:
         endpoint = api_context["endpoint"]
         headers = api_context["headers"]
 
-        processes = requests.get(
+        response = requests.get(
             f"{endpoint}/processes/?include_deleted=false",
             headers=headers,
             timeout=30,
-        ).json()
+        )
+        response.raise_for_status()
+        processes = response.json()
+
+        if "items" not in processes:
+            logger.error(
+                "Invalid API response structure. Expected 'items' key. Response: %s",
+                processes,
+            )
+            raise KeyError(
+                f"'items' key not found in API response. Response keys: {list(processes.keys())}"
+            )
+
         process = next(p for p in processes["items"] if p["name"] == process_name)
         process_id = process["id"]
 
@@ -82,11 +94,23 @@ def get_dashboard_step_run_id(
         endpoint = api_context["endpoint"]
         headers = api_context["headers"]
 
-        steps = requests.get(
+        response = requests.get(
             f"{endpoint}/steps/process/{process_id}?include_deleted=false",
             headers=headers,
             timeout=30,
-        ).json()
+        )
+        response.raise_for_status()
+        steps = response.json()
+
+        if not isinstance(steps, list):
+            logger.error(
+                "Invalid API response structure. Expected list of steps. Response: %s",
+                steps,
+            )
+            raise ValueError(
+                f"Expected list of steps, got {type(steps).__name__}: {steps}"
+            )
+
         step = next(s for s in steps if s["name"] == step_name)
         step_id = step["id"]
         return step_id
@@ -102,7 +126,25 @@ def get_dashboard_run_id(process_id: int, cpr: str, api_context: dict) -> dict:
         headers = api_context["headers"]
 
         runs_url = f"{endpoint}/runs/?process_id={process_id}&meta_filter=cpr:{cpr}"
-        runs = requests.get(runs_url, headers=headers, timeout=30).json()
+        response = requests.get(runs_url, headers=headers, timeout=30)
+        response.raise_for_status()
+        runs = response.json()
+
+        if "items" not in runs:
+            logger.error(
+                "Invalid API response structure. Expected 'items' key. Response: %s",
+                runs,
+            )
+            raise KeyError(
+                f"'items' key not found in API response. Response keys: {list(runs.keys())}"
+            )
+
+        if not runs["items"]:
+            logger.error(
+                "No runs found for process_id: %s and cpr: %s", process_id, cpr
+            )
+            raise ValueError(f"No runs found for the given criteria.")
+
         run_id = runs["items"][0]["id"]
         return run_id
     except Exception as e:
@@ -119,11 +161,23 @@ def get_dashboard_step_run_details(
         endpoint = api_context["endpoint"]
         headers = api_context["headers"]
 
-        step_run = requests.get(
+        response = requests.get(
             f"{endpoint}/step-runs/run/{run_id}/step/{step_id}?include_deleted=false",
             headers=headers,
             timeout=30,
-        ).json()
+        )
+        response.raise_for_status()
+        step_run = response.json()
+
+        if not isinstance(step_run, dict):
+            logger.error(
+                "Invalid API response structure. Expected dict of step run details. Response: %s",
+                step_run,
+            )
+            raise ValueError(
+                f"Expected dict for step run details, got {type(step_run).__name__}: {step_run}"
+            )
+
         return step_run
     except Exception as e:
         logger.error("Error retrieving step run details: %s", e)

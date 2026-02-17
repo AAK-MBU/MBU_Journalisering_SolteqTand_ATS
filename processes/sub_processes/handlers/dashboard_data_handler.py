@@ -143,7 +143,7 @@ def get_dashboard_run_id(process_id: int, cpr: str, api_context: dict) -> dict:
             logger.error(
                 "No runs found for process_id: %s and cpr: %s", process_id, cpr
             )
-            raise ValueError(f"No runs found for the given criteria.")
+            raise ValueError("No runs found for the given criteria.")
 
         run_id = runs["items"][0]["id"]
         return run_id

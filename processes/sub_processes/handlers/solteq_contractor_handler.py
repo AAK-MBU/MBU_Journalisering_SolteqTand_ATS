@@ -32,6 +32,8 @@ def check_if_clinic_is_in_database() -> bool:
         }
 
         result = database.get_list_of_clinics(or_filters=[filters])
+
+        # Set private clinic data in context for further use
         set_context_values(private_clinic_data=result)
 
         exists = result is not None and len(result) > 0

@@ -137,8 +137,8 @@ def validate_contractor():
             new_contractor_id,
         )
 
-        # Update contractor if it has changed
-        if current_extern_dentist_data and (
+        # Update contractor if it has changed or if no current contractor is set
+        if not current_extern_dentist_data or (
             current_contractor_id != new_contractor_id
             or current_contractor_phone_number != new_contractor_phone_number
         ):

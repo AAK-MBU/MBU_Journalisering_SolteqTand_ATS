@@ -14,7 +14,7 @@ from processes.sub_processes.handlers.dashboard_data_handler import (
     update_dashboard_step_run,
 )
 from processes.sub_processes.handlers.solteq_contractor_handler import (
-    check_if_clinic_is_in_database,
+    match_clinic,
 )
 
 logger = logging.getLogger(__name__)
@@ -68,30 +68,40 @@ def check_clinic_data_and_consent():
         ) from e
 
 
-def _more_than_one_clinic_found_error():
-    error_message = {
-        "type": "BusinessError",
-        "message": "Telefonnummeret matcher flere klinikker i Solteq.",
-    }
-    logger.error(
-        "Multiple clinics found in SolteqTand database for the given phone number."
-    )
-    raise BusinessError(error_message["message"])
-
-
 def validate_contractor():
     """Validate contractor in SolteqTand database and update contractor if exists."""
     try:
         # Update dashboard to indicate step is running
         update_dashboard_step_run(step_name=DASHBOARD_STEP_6_NAME, status="running")
 
+        # Use the clinic lookup function
+        match_result = match_clinic()
+
+        if not match_result["success"]:
+            contractor_lookup_error = {
+                "type": "BusinessError",
+                "message": f"""Vi kunne ikke matche den valgte tandklinik med en klinik i Solteq – hverken via ydernummer eller telefonnummer.
+                Detaljer: {match_result["error"]}
+                Kontakt Tandplejens administration, tandplejen@mbu.aarhus.dk, og bed om at få undersøgt,
+                om tandklinikken er oprettet i Solteq eller om den mangler oplysninger om ydernummer eller telefonnummer, der matcher det i EDI.
+                Afvent svar.
+                Du kan genstarte processen, når klinikken er oprettet eller dens oplysninger er rettet i Solteq.""",
+            }
+            logger.error(
+                "Contractor not found in SolteqTand database. Error: %s",
+                match_result["error"],
+            )
+            raise BusinessError(contractor_lookup_error["message"])
+
+        # Get matched clinic data
+        matched_clinic = match_result["clinic"]
+        logger.info("Matched clinic data: %s", matched_clinic)
+
+        # Get current contractor data from patient
         solteq_app = get_app()
         if solteq_app is None:
             raise ValueError("Could not get application instance.")
 
-        contractor_in_database = check_if_clinic_is_in_database()
-
-        # Check if contractor is set on patient in Solteq Tand
         solteq_db_conn = get_rpa_constant("srvapptmtsql03_connection_string")
         solteq_db_obj = SolteqTandDatabase(conn_str=solteq_db_conn)
         filters = {
@@ -101,29 +111,14 @@ def validate_contractor():
             filters=filters
         )
 
-        # Raise error if more than one clinic is found with the same phone number in the database
         logger.info("Current extern dentist data: %s", current_extern_dentist_data)
-        if len(current_extern_dentist_data) > 1:
-            _more_than_one_clinic_found_error()
+        logger.info("Matched clinic data: %s", matched_clinic)
 
-        logger.info(
-            "Private clinic data: %s", get_context_values("private_clinic_data")
-        )
-        if len(get_context_values("private_clinic_data")) > 1:
-            _more_than_one_clinic_found_error()
+        new_contractor_id = matched_clinic.get("contractorId", [])
+        new_contractor_phone_number = matched_clinic.get("phoneNumber", [])
 
-        new_contractor_id = get_context_values("private_clinic_data")[0].get(
-            "contractorId", []
-        )
-        new_contractor_phone_number = get_context_values("private_clinic_data")[0].get(
-            "phoneNumber", []
-        )
-        logger.info("Current extern dentist data: %s", current_extern_dentist_data)
         logger.info("New contractor ID: %s", new_contractor_id)
         logger.info("New contractor phone number: %s", new_contractor_phone_number)
-
-        logger.info("Contractor in database: %s", contractor_in_database)
-        logger.info("Current extern dentist data: %s", current_extern_dentist_data)
 
         current_contractor_id = (
             current_extern_dentist_data[0]["contractorId"]
@@ -137,36 +132,20 @@ def validate_contractor():
         )
 
         logger.info(
-            "Check %s",
-            contractor_in_database
-            and (
-                current_contractor_id != new_contractor_id
-                or current_contractor_phone_number != new_contractor_phone_number
-            ),
+            "Comparing contractors - Current: %s vs New: %s",
+            current_contractor_id,
+            new_contractor_id,
         )
 
-        if contractor_in_database and (
+        # Update contractor if it has changed
+        if current_extern_dentist_data and (
             current_contractor_id != new_contractor_id
             or current_contractor_phone_number != new_contractor_phone_number
         ):
+            logger.info("Contractor data has changed, updating in Solteq...")
             solteq_app.change_private_clinic(
-                private_clinic=get_context_values("private_clinic_data")[0].get(
-                    "name", []
-                )
+                private_clinic=matched_clinic.get("name", [])
             )
-
-        if not contractor_in_database:
-            contractor_lookup_error = {
-                "type": "BusinessError",
-                "message": """Vi kunne ikke matche den valgte tandklinik med en klinik i Solteq – hverken via ydernummer eller telefonnummer. \n
-                Kontakt Tandplejens administration, tandplejen@mbu.aarhus.dk, og bed om at få undersøgt, \n
-                om tandklinikken er oprettet i Solteq eller om den mangler oplysninger om ydernummer eller telefonnummer, der matcher det i EDI. \n
-                Afvent svar. \n
-                Du kan genstarte processen, når klinikken er oprettet eller dens oplysninger er rettet i Solteq.
-                """,
-            }
-            logger.error("Contractor not found in SolteqTand database.")
-            raise BusinessError(contractor_lookup_error["message"])
 
         update_dashboard_step_run(step_name=DASHBOARD_STEP_6_NAME, status="success")
     except BusinessError as be:

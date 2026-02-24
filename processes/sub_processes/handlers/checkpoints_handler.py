@@ -138,11 +138,14 @@ def validate_contractor():
         )
 
         # Update contractor if it has changed or if no current contractor is set
+        logger.info("Checking if contractor data has changed or is missing...")
         if not current_extern_dentist_data or (
             current_contractor_id != new_contractor_id
             or current_contractor_phone_number != new_contractor_phone_number
         ):
-            logger.info("Contractor data has changed, updating in Solteq...")
+            logger.info(
+                "Contractor data has changed or is missing. Updating contractor information..."
+            )
             solteq_app.change_private_clinic(
                 private_clinic=matched_clinic.get("name", [])
             )

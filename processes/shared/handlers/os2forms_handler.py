@@ -6,7 +6,7 @@ import os
 from mbu_dev_shared_components.os2forms.documents import download_file_bytes
 
 from helpers import config
-from helpers.context_handler import get_context_values, set_context_values
+from helpers.context_functions import get_context_values, set_context_values
 from helpers.credential_constants import get_rpa_credentials
 
 logger = logging.getLogger(__name__)

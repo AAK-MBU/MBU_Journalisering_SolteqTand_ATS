@@ -7,7 +7,7 @@ from mbu_dev_shared_components.utils.db_stored_procedure_executor import (
     execute_stored_procedure,
 )
 
-from helpers.context_handler import get_context_values
+from helpers.context_functions import get_context_values
 from helpers.credential_constants import get_rpa_constant
 
 logger = logging.getLogger(__name__)

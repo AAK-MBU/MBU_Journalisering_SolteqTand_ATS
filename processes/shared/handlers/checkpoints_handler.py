@@ -6,7 +6,7 @@ from mbu_dev_shared_components.solteqtand.database import SolteqTandDatabase
 from mbu_rpa_core.exceptions import BusinessError, ProcessError
 
 from helpers.config import DASHBOARD_STEP_6_NAME, DASHBOARD_STEP_7_NAME
-from helpers.context_handler import get_context_values
+from helpers.context_functions import get_context_values
 from helpers.credential_constants import get_rpa_constant
 from processes.application_handler import get_app
 from processes.sub_processes.handlers.dashboard_data_handler import (

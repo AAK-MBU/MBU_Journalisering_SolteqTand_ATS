@@ -3,6 +3,11 @@
 MAX_RETRY = 10
 
 # ----------------------
+# Subprocess settings
+# ----------------------
+SUBPROCESS_CHOICES = ["udskrivning22ar", "tilflytter"]
+
+# ----------------------
 # Queue population settings
 # ----------------------
 MAX_CONCURRENCY = 100  # tune based on backend capacity

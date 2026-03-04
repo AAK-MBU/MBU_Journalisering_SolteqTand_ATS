@@ -8,7 +8,7 @@ import requests
 from mbu_rpa_core.exceptions import BusinessError
 
 from helpers import config
-from helpers.context_handler import get_context_values
+from helpers.context_functions import get_context_values
 
 logger = logging.getLogger(__name__)
 

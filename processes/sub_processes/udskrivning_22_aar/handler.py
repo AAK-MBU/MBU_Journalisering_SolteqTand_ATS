@@ -2,6 +2,9 @@
 
 import logging
 
+from mbu_process_dashboard_shared_components import (
+    process_step_run,
+)
 from mbu_rpa_core.exceptions import BusinessError
 
 from helpers.context_functions import get_context_values
@@ -32,6 +35,12 @@ def process_udskrivning_22_aar(item_data: dict, item_reference: str, item_id: st
         update_process_run_metadata(item_data)
 
         # Update dashboard for step 4
+        process_step_run.update_dashboard_step_run_by_id(
+            client="",
+            step_run_id="",
+            update_data="",
+        )
+
         update_dashboard_step_run(step_name=DASHBOARD_STEP_4_NAME, status="running")
 
         update_dashboard_step_run(step_name=DASHBOARD_STEP_4_NAME, status="success")

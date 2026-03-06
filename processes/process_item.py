@@ -6,6 +6,7 @@ from mbu_rpa_core.exceptions import BusinessError, ProcessError
 
 from helpers.config import SUBPROCESS_CHOICES
 from processes.application_handler import close
+from processes.shared.handlers.journalizing_db_handler import update_process_status
 from processes.shared.utils.clean_up import clean_up
 from processes.sub_processes.udskrivning_22_aar.handler import (
     process_udskrivning_22_aar,

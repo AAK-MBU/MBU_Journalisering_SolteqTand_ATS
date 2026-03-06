@@ -5,7 +5,6 @@ import os
 
 from mbu_dev_shared_components.os2forms.documents import download_file_bytes
 
-from helpers import config
 from helpers.context_functions import get_context_values, set_context_values
 from helpers.credential_constants import get_rpa_credentials
 
@@ -74,14 +73,17 @@ def get_os2forms_document():
     try:
         logger.info("Starting document download from OS2 Forms.")
         api_key = get_rpa_credentials("os2_api")
-        full_path = os.path.join(config.DOCUMENT_PATH, config.DOCUMENT_FILE_NAME)
+        full_path = os.path.join(
+            get_context_values("document_file_path"),
+            get_context_values("document_file_name"),
+        )
 
         _ensure_folder_exists(full_path)
         _delete_file(full_path)
 
         file_bytes = download_file_bytes(
             os2_api_key=api_key["decrypted_password"],
-            url=get_context_values("url"),
+            url=get_context_values("os2_forms_url"),
         )
 
         with open(full_path, "wb") as file:

@@ -37,7 +37,7 @@ name = "appscript"
 version = "1.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
-    { name = "lxml" },
+    { name = "lxml", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
 ]
 sdist = { url = "https://files.pythonhosted.org/packages/ca/52/2fa70edfd98f0058219ecc2e365a3ba7aabd42db14ff9d7f44bbdcc5400d/appscript-1.4.0.tar.gz", hash = "sha256:b2c6fc770bf822ea45529c7084bc0ee340e67ab260016b01d28e0449ec8723be", size = 295279, upload-time = "2025-10-08T07:56:39.126Z" }
 wheels = [
@@ -404,7 +404,7 @@ dependencies = [
 requires-dist = [
     { name = "automation-server-client", git = "https://github.com/odense-rpa/automation-server-client.git?tag=v0.2.0" },
     { name = "mbu-dev-shared-components", extras = ["solteqtand", "romexis", "utils", "os2forms"], specifier = "==4.2.8" },
-    { name = "mbu-process-dashboard-shared-components", specifier = "==1.3.0" },
+    { name = "mbu-process-dashboard-shared-components", specifier = "==1.4.0" },
     { name = "mbu-rpa-core" },
     { name = "pillow" },
     { name = "pyodbc" },
@@ -414,7 +414,7 @@ requires-dist = [
 
 [[package]]
 name = "mbu-process-dashboard-shared-components"
-version = "1.3.0"
+version = "1.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cryptography" },
@@ -429,9 +429,9 @@ dependencies = [
     { name = "ruff" },
     { name = "sqlalchemy", extra = ["asyncio"] },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/da/e7/a929674a10da74c9dddc74096a05bafbd242f7c15f00e6711ae4da5aecdc/mbu_process_dashboard_shared_components-1.3.0.tar.gz", hash = "sha256:d0bbd22ad0ac376b09f37db493316cb18536a1b0c58fe5fbdf59ffedc107f1ad", size = 6902, upload-time = "2026-02-27T12:50:58.704Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/44/bc/e707f4bd982caba0c2184ab07c1d3206113848253747153cb976eec47931/mbu_process_dashboard_shared_components-1.4.0.tar.gz", hash = "sha256:3253c4f51a6cd2755ad352d0fe3371ed04ba06d9d16411ecfd2b7a0040736a93", size = 6963, upload-time = "2026-03-06T12:22:09.476Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/2e/c1/b785f10848048b3093ffd85b434ffd77ac9111257d88bf4fa440c21885a1/mbu_process_dashboard_shared_components-1.3.0-py3-none-any.whl", hash = "sha256:4efc4793a8abe0f044003b73a3e00a9b149dcfbd3144a035e5d9af7d9a0d04be", size = 9624, upload-time = "2026-02-27T12:50:57.368Z" },
+    { url = "https://files.pythonhosted.org/packages/9b/37/631d683f85e24d2bfed1e1d74f053426f7de739c5681c7524c83c59dc66b/mbu_process_dashboard_shared_components-1.4.0-py3-none-any.whl", hash = "sha256:b1b4a9eaf4207838d4b99d7c4b18178eca0dd1b995c6ae4a3dbc5b0dab98e057", size = 9673, upload-time = "2026-03-06T12:22:08.495Z" },
 ]
 
 [[package]]

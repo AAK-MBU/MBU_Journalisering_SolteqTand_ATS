@@ -4,14 +4,10 @@ import logging
 
 from mbu_dev_shared_components.solteqtand.database import SolteqTandDatabase
 
-from helpers import config
 from helpers.context_functions import get_context_values
 from helpers.credential_constants import get_rpa_constant
 from processes.application_handler import get_app
-from processes.sub_processes.handlers.dashboard_data_handler import (
-    update_dashboard_step_run,
-)
-from processes.sub_processes.handlers.journalizing_db_handler import (
+from processes.shared.handlers.journalizing_db_handler import (
     update_process_status,
     update_response_metadata,
 )
@@ -19,7 +15,7 @@ from processes.sub_processes.handlers.journalizing_db_handler import (
 logger = logging.getLogger(__name__)
 
 
-def journalize_document():
+def journalize_document(document_type: str, document_file_name: str):
     """Function to journalize document in SolteqTand"""
     try:
         logger.info("Starting document journalizing process.")
@@ -30,7 +26,6 @@ def journalize_document():
             raise ValueError("Could not get application instance.")
 
         solteq_db_conn = get_rpa_constant("srvapptmtsql03_connection_string")
-        document_type = config.DOCUMENT_TYPE
         full_path = get_context_values("os2forms_document_path")
         item_reference = get_context_values("reference")
 
@@ -40,7 +35,7 @@ def journalize_document():
         # Check if document already exists else journalize it
         filters = {
             "p.cpr": get_context_values("cpr"),
-            "ds.OriginalFilename": config.DOCUMENT_FILE_NAME,
+            "ds.OriginalFilename": document_file_name,
             "ds.DocumentType": document_type,
             "ds.DocumentDescription": f"%{item_reference}%",
             "ds.rn": "1",
@@ -72,11 +67,5 @@ def journalize_document():
             step_name="Document", json_fragment={"DocumentCreated": False}
         )
         update_process_status("Failed")
-        update_dashboard_step_run(
-            step_name=config.DASHBOARD_STEP_5_NAME,
-            status="failed",
-            failure=e,
-            rerun=True,
-        )
         logger.error("Error journalizing document: %s", e)
         raise RuntimeError("Error journalizing document: " + str(e)) from e

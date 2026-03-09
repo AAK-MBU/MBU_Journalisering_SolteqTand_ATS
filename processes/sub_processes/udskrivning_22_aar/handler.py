@@ -14,10 +14,10 @@ from processes.shared.handlers.dashboard_data_handler import (
     handle_process_dashboard,
     update_process_run_metadata,
 )
-from processes.shared.handlers.document_handler import journalize_document
+from processes.shared.handlers.journalize_document_handler import (
+    journalize_form_document,
+)
 from processes.shared.handlers.journalizing_db_handler import update_process_status
-from processes.shared.handlers.journalnote_handler import create_journalnote
-from processes.shared.handlers.os2forms_handler import get_os2forms_document
 from processes.shared.utils.clean_up import release_keys
 from processes.sub_processes.udskrivning_22_aar.set_context import set_context_vars
 
@@ -38,22 +38,24 @@ def process_udskrivning_22_aar(item_data: dict, item_reference: str, item_id: st
         release_keys()
 
         # Set context variables for further processing
-        set_context_vars(item_data, item_reference, item_id)
+        set_context_vars(
+            item_data=item_data, item_reference=item_reference, item_id=item_id
+        )
 
         # Update process run metadata with clinic phone number and dispatch ID
-        update_process_run_metadata(item_data)
+        update_process_run_metadata(
+            item_data=item_data, process_name=config.DASHBOARD_PROCESS_NAME
+        )
 
-        # Update dashboard for step 4
+        # Step 4
         logger.info(
             "Handling dashboard update for step: %s ...",
             config.DASHBOARD_STEP_4_NAME,
         )
-        # Update dashboard step run status to "running"
         handle_process_dashboard(
             status="running",
             process_step_name=config.DASHBOARD_STEP_4_NAME,
         )
-        # Update dashboard step run status to "success"
         handle_process_dashboard(
             status="success",
             process_step_name=config.DASHBOARD_STEP_4_NAME,
@@ -70,42 +72,39 @@ def process_udskrivning_22_aar(item_data: dict, item_reference: str, item_id: st
         logger.info("Opening patient in Solteq Tand application...")
         solteq_app.open_patient(get_context_values("cpr"))
 
-        # Download document from OS2
-        get_os2forms_document()
-
-        def journalize_form_document():
-            """Journalize form document in Solteq Tand application"""
-            handle_process_dashboard(
-                status="running",
-                process_step_name=config.DASHBOARD_STEP_5_NAME,
-            )
-
-            journalize_document()
-            create_journalnote()
-
-            handle_process_dashboard(
-                status="success",
-                process_step_name=config.DASHBOARD_STEP_5_NAME,
-            )
-
+        # Step 5
         # Journalize form document
-        journalize_form_document()
+        journalize_form_document(
+            current_step_name=config.DASHBOARD_STEP_5_NAME,
+            document_type=config.DOCUMENT_TYPE,
+            document_file_name=config.DOCUMENT_FILE_NAME,
+            journal_note_message=config.JOURNAL_NOTE_DOCUMENT_MESSAGE,
+        )
 
-        # Check if contractor exists in SolteqTand database and update contractor if exists.
         # Step 6
-        validate_contractor()
+        # Check if contractor exists in SolteqTand database and update contractor if exists.
+        validate_contractor(
+            step_name=config.DASHBOARD_STEP_6_NAME,
+        )
 
-        # Check if clinic data matches and if consent is given
         # Step 7
-        check_clinic_data_and_consent()
+        # Check if clinic data matches and if consent is given
+        check_clinic_data_and_consent(
+            process_name=config.DASHBOARD_PROCESS_NAME,
+            process_step_name=config.DASHBOARD_STEP_7_NAME,
+        )
 
         # Update journalizing process status in RPA database
         update_process_status("Successful")
     except BusinessError as be:
         logger.error("Business error occurred: %s", be)
+
+        # Update process status to "Failed" in journalizing database
         update_process_status("Failed")
         raise be
     except Exception as e:
-        logger.error("%s", e)
+        logger.error("Application error occurred: %s", e)
+
+        # Update process status to "Failed" in journalizing database
         update_process_status("Failed")
         raise e

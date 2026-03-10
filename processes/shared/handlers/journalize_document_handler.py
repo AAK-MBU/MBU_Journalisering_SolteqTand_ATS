@@ -7,7 +7,7 @@ from processes.shared.handlers.journalnote_handler import create_journalnote
 from processes.shared.handlers.os2forms_handler import get_os2forms_document
 
 
-def journalize_form_document(
+def handle_form_document_journalization(
     current_step_name: str,
     document_type: str,
     document_file_name: str,

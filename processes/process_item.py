@@ -9,6 +9,7 @@ from helpers.context_functions import get_context_values
 from processes.application_handler import close
 from processes.shared.handlers.dashboard_data_handler import handle_process_dashboard
 from processes.shared.utils.clean_up import clean_up
+from processes.sub_processes.tilflytter.handler import process_tilflytter
 from processes.sub_processes.udskrivning_22_aar.handler import (
     process_udskrivning_22_aar,
 )

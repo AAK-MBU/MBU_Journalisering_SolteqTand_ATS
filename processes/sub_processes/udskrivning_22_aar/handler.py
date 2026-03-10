@@ -15,7 +15,7 @@ from processes.shared.handlers.dashboard_data_handler import (
     update_process_run_metadata,
 )
 from processes.shared.handlers.journalize_document_handler import (
-    journalize_form_document,
+    handle_form_document_journalization,
 )
 from processes.shared.handlers.journalizing_db_handler import update_process_status
 from processes.shared.utils.clean_up import release_keys
@@ -74,7 +74,7 @@ def process_udskrivning_22_aar(item_data: dict, item_reference: str, item_id: st
 
         # Step 5
         # Journalize form document
-        journalize_form_document(
+        handle_form_document_journalization(
             current_step_name=config.DASHBOARD_STEP_5_NAME,
             document_type=config.DOCUMENT_TYPE,
             document_file_name=config.DOCUMENT_FILE_NAME,

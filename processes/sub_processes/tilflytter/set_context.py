@@ -13,6 +13,7 @@ def set_context_vars(item_data: dict, item_reference: str, item_id: str):
         reference=item_reference,
         cpr=item_data.get("cpr", ""),
         citizen_phone_number=item_data.get("borger_telefonnummer", ""),
+        clinic_name=item_data.get("klinik_navn", ""),
         work_item=item_id,
         document_file_path=config.DOCUMENT_PATH,
         document_file_name=config.DOCUMENT_FILE_NAME,

@@ -14,6 +14,7 @@ dependencies = [
     "ruff",
     "sqlalchemy",
     "pyodbc",
+    "pytest",
 ]
 
 [tool.uv.sources]
@@ -59,6 +60,10 @@ select = [
 [tool.ruff.format]
 # Use the formatter; CI step already checks it with `ruff format --check .`
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
 [tool.pyright]
 include = ["."]
 exclude = [
@@ -71,3 +76,8 @@ exclude = [
 pythonVersion = "3.13"
 typeCheckingMode = "basic"   # or "basic"
 reportMissingTypeStubs = false
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+]

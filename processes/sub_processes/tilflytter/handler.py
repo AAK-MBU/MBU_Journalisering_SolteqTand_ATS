@@ -7,10 +7,14 @@ from mbu_rpa_core.exceptions import BusinessError
 from helpers.context_functions import get_context_values
 from processes.application_handler import get_app
 from processes.shared.handlers.dashboard_data_handler import handle_process_dashboard
-from processes.shared.handlers.journalize_document_handler import (
-    handle_form_document_journalization,
+from processes.shared.handlers.journalizing.db_handler import update_process_status
+from processes.shared.handlers.journalizing.process_journalizing import (
+    process_journalization_step,
 )
-from processes.shared.handlers.journalizing_db_handler import update_process_status
+from processes.shared.handlers.journalizing.solteq_note_handler import (
+    create_journalnote,
+    create_sub_note,
+)
 from processes.shared.utils.clean_up import release_keys
 from processes.sub_processes.tilflytter.set_context import set_context_vars
 
@@ -50,15 +54,58 @@ def process_tilflytter(item_data: dict, item_reference: str, item_id: str):
         logger.info("Opening patient in Solteq Tand application...")
         solteq_app.open_patient(get_context_values("cpr"))
 
-        # Journalize form document and create administrativ note in SolteqTand
-        handle_form_document_journalization(
-            current_step_name=config.DASHBOARD_STEP_6_NAME,
+        # Journalize form document in Solteq
+        process_journalization_step(
             document_type=config.DOCUMENT_TYPE,
             document_file_name=config.DOCUMENT_FILE_NAME,
-            journal_note_message=config.JOURNAL_NOTE_DOCUMENT_MESSAGE,
         )
 
-        # Journalize consent
+        # Create administrativ note in Solteq based on form input
+        create_journalnote(
+            journal_note_message=config.ADM_NOTE_MESSAGE,
+            checkmark_in_complete=True,
+            note_type=config.ADM_NOTE_TYPE,
+        )
+
+        # Create administrative note in SolteqTand based on consent for school kids
+        consent_generel = get_context_values("journal_consent")
+        if consent_generel:
+            create_journalnote(
+                journal_note_message=config.ADM_NOTE_CONSENT_MESSAGE,
+                checkmark_in_complete=True,
+                note_type=config.ADM_NOTE_CONSENT_TYPE,
+            )
+        elif not consent_generel:
+            create_journalnote(
+                journal_note_message=config.ADM_NOTE_NO_CONSENT_MESSAGE,
+                checkmark_in_complete=True,
+                note_type=config.ADM_NOTE_NO_CONSENT_TYPE,
+            )
+        else:
+            raise ValueError("Journal consent must be True or False.")
+
+        # Create administrative note in SolteqTand based on consent for fetching previous journal
+        consent_treatment = get_context_values("treatment_consent")
+        if consent_treatment:
+            create_journalnote(
+                journal_note_message=config.DIAGNOSE_NOTE_CONSENT_MESSAGE,
+                checkmark_in_complete=True,
+                note_type=config.DIAGNOSE_NOTE_CONSENT_TYPE,
+            )
+            create_sub_note(
+                parent_note="",
+                sub_note_message=config.DIAGNOSE_SUB_NOTE_CONSENT_MESSAGE,
+                sub_note_type=config.DIAGNOSE_SUB_NOTE_CONSENT_TYPE,
+                checkmark_in_complete=True,
+            )
+        elif not consent_treatment:
+            create_journalnote(
+                journal_note_message=config.DIAGNOSE_NOTE_NO_CONSENT_MESSAGE,
+                checkmark_in_complete=True,
+                note_type=config.DIAGNOSE_NOTE_NO_CONSENT_TYPE,
+            )
+        else:
+            raise ValueError("Treatment consent must be True or False.")
 
         # Update or insert phone number in SolteqTand
         solteq_app.update_or_change_phone_number(

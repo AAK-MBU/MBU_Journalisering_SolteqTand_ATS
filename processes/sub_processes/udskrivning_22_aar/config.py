@@ -8,13 +8,16 @@ DOCUMENT_TYPE = "Digital blanket"
 # ----------------------
 # Journal note handling settings
 # ----------------------
-JOURNAL_NOTE_DOCUMENT_MESSAGE = "Administrativt notat 'Anmodning om journalmateriale via digital formular. Se dokumenter'"
-JOURNAL_NOTE_NO_CONSENT_MESSAGE = (
-    "Administrativt notat 'Ikke samtykke til afsendelse af journalmateriale'"
+ADM_NOTE_TYPE = "Administrativt notat"
+ADM_NOTE_MESSAGE = (
+    "'TEST Anmodning om journalmateriale via digital formular. Se dokumenter'"
 )
-JOURNAL_NOTE_CONSENT_MESSAGE = (
-    "Administrativt notat 'Samtykke til afsendelse af journalmateriale.'"
-)
+
+ADM_NOTE_CONSENT_TYPE = "Administrativt notat"
+ADM_NOTE_CONSENT_MESSAGE = "'TEST Samtykke til afsendelse af journalmateriale'"
+
+ADM_NOTE_NO_CONSENT_TYPE = "Administrativt notat"
+ADM_NOTE_NO_CONSENT_MESSAGE = "'TEST Ikke samtykke til afsendelse af journalmateriale'"
 
 # ----------------------
 # Dashboard settings

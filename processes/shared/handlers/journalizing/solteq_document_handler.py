@@ -7,7 +7,7 @@ from mbu_dev_shared_components.solteqtand.database import SolteqTandDatabase
 from helpers.context_functions import get_context_values
 from helpers.credential_constants import get_rpa_constant
 from processes.application_handler import get_app
-from processes.shared.handlers.journalizing_db_handler import (
+from processes.shared.handlers.journalizing.db_handler import (
     update_process_status,
     update_response_metadata,
 )

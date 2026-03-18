@@ -1,116 +1,146 @@
-"""Handler for the 'Udskrivning 22 år' process."""
-
 import logging
+import os
 
+from mbu_process_dashboard_shared_components.process import find_process_id_and_steps
+from mbu_process_dashboard_shared_components.process_run import (
+    ProcessDashboardClient,
+    get_all_process_runs,
+)
 from mbu_rpa_core.exceptions import BusinessError
 
-from helpers.context_functions import get_context_values, set_context_values
-from processes.application_handler import get_app
-from processes.shared.handlers.dashboard_data_handler import (
-    handle_process_dashboard,
-    update_process_run_metadata,
+from helpers.context_functions import get_context_values
+from processes.shared.handlers.dashboard_data_handler import handle_process_dashboard
+from processes.shared.handlers.journalizing.solteq_note_handler import (
+    create_journalnote,
 )
-from processes.shared.handlers.journalizing.db_handler import update_process_status
-from processes.shared.handlers.journalizing.process_journalizing import (
-    process_journalization_step,
-)
-from processes.shared.handlers.solteq_contractor_handler import validate_contractor
-from processes.shared.utils.clean_up import release_keys
-from processes.sub_processes.udskrivning_22_aar.consent_handler import consent_handler
-from processes.sub_processes.udskrivning_22_aar.set_context import set_context_vars
-
-from . import config
+from processes.sub_processes.udskrivning_22_aar import config
 
 logger = logging.getLogger(__name__)
 
 
-def process_udskrivning_22_aar(
-    item_data: dict, item_reference: str, item_id: str
-) -> None:
-    """Function to handle the 'Udskrivning 22 år' process item."""
+def _check_if_clinic_data_match(process_name: str) -> bool:
+    """
+    Checks if the clinic data from the dashboard matches the context values.
+
+    Returns:
+        bool: True if clinic data matches, False otherwise.
+    """
     try:
-        logger.info(
-            "Processing 'Udskrivning 22 år' item with reference: %s and id: %s",
-            item_reference,
-            item_id,
+        api_admin_token = os.environ.get("API_ADMIN_TOKEN")
+        if not api_admin_token:
+            raise ValueError("API_ADMIN_TOKEN environment variable is not set")
+
+        client = ProcessDashboardClient(api_admin_token=api_admin_token)
+
+        process_id, _ = find_process_id_and_steps(client, process_name)
+        if not process_id:
+            raise ValueError(
+                f"Process with name '{process_name}' not found in dashboard."
+            )
+
+        runs = get_all_process_runs(
+            client=client,
+            process_id=process_id,
+            meta_filter=f"cpr:{get_context_values('cpr')}",
+        )
+        if not runs:
+            return False
+
+        latest_run = runs[0]
+        meta = latest_run.get("meta", {})
+
+        # Extract clinic data from dashboard meta
+        dashboard_clinic_phone = (
+            (meta.get("new_clinic_phone_number") or "").strip().lower()
+        )
+        dashboard_clinic_provider = (
+            (meta.get("new_clinic_ydernummer") or "").strip().lower()
         )
 
-        release_keys()
-
-        # Set context variables for further processing
-        set_context_vars(
-            item_data=item_data, item_reference=item_reference, item_id=item_id
+        # Extract clinic data from context values
+        context_clinic_phone = (
+            (get_context_values("clinic_phone_number") or "").strip().lower()
+        )
+        context_clinic_provider = (
+            (get_context_values("clinic_provider_number") or "").strip().lower()
         )
 
-        # Update process run metadata with clinic phone number and dispatch ID
-        update_process_run_metadata(
-            item_data=item_data, process_name=config.DASHBOARD_PROCESS_NAME
+        return (
+            dashboard_clinic_phone == context_clinic_phone
+            or dashboard_clinic_provider == context_clinic_provider
         )
+    except Exception as e:
+        logger.error("Error checking clinic data match: %s", e)
+        raise e
 
-        # Step 4
-        # Form received
-        logger.info(
-            "Handling step 4: %s ...",
-            config.DASHBOARD_STEP_4_NAME,
-        )
-        set_context_values(current_step_name=config.DASHBOARD_STEP_4_NAME)
+
+def _check_clinic_data_and_consent(process_name: str):
+    """Check if clinic data matches and consent is given"""
+    try:
+        clinic_data_matches = _check_if_clinic_data_match(process_name=process_name)
+        consent_given = get_context_values("consent")
+
+        if not clinic_data_matches and consent_given:
+            clinic_match_and_consent_error = {
+                "type": "BusinessError",
+                "message": "Klinikdata matcher ikke, men samtykke givet.",
+            }
+            logger.error("Clinic data does not match, but consent has been given.")
+            raise BusinessError(clinic_match_and_consent_error["message"])
+
+        elif not clinic_data_matches and not consent_given:
+            clinic_match_and_consent_error = {
+                "type": "BusinessError",
+                "message": "Klinikdata matcher ikke, og samtykke ikke givet.",
+            }
+            logger.error("Clinic data does not match, and consent has not been given.")
+            raise BusinessError(clinic_match_and_consent_error["message"])
+
+    except BusinessError as be:
+        logger.error("Business error: %s", be)
+        raise be
+    except Exception as e:
+        logger.error("Error checking clinic data and consent: %s", e)
+        raise e
+
+
+def consent_udskrivning22aar_handler() -> None:
+    """Handler for consent step, checks clinic data and consent, and creates journal note"""
+    try:
         handle_process_dashboard(
             status="running",
             process_step_name=get_context_values("current_step_name"),
         )
+
+        create_journalnote(
+            journal_note_message=config.ADM_NOTE_MESSAGE,
+            checkmark_in_complete=True,
+            note_type=config.ADM_NOTE_TYPE,
+        )
+
+        _check_clinic_data_and_consent(
+            process_name=config.DASHBOARD_PROCESS_NAME,
+        )
+
+        consent = get_context_values("consent")
+        if consent:
+            create_journalnote(
+                journal_note_message=config.ADM_NOTE_CONSENT_MESSAGE,
+                checkmark_in_complete=True,
+                note_type=config.ADM_NOTE_CONSENT_TYPE,
+            )
+        elif not consent:
+            create_journalnote(
+                journal_note_message=config.ADM_NOTE_NO_CONSENT_MESSAGE,
+                checkmark_in_complete=True,
+                note_type=config.ADM_NOTE_NO_CONSENT_TYPE,
+            )
+
         handle_process_dashboard(
             status="success",
             process_step_name=get_context_values("current_step_name"),
         )
 
-        # Set journalizing process status in RPA database
-        update_process_status("InProgress")
-
-        # Get the application instance and open patient in Solteq Tand application
-        solteq_app = get_app()
-        if solteq_app is None:
-            raise ValueError("Could not get application instance.")
-
-        logger.info("Opening patient in Solteq Tand application...")
-        solteq_app.open_patient(get_context_values("cpr"))
-
-        # Step 5
-        # Journalize form document in Solteq
-        logger.info(
-            "Handling step 5: %s ...",
-            config.DASHBOARD_STEP_5_NAME,
-        )
-        set_context_values(current_step_name=config.DASHBOARD_STEP_5_NAME)
-        process_journalization_step(
-            document_type=config.DOCUMENT_TYPE,
-            document_file_name=config.DOCUMENT_FILE_NAME,
-        )
-
-        # Step 6
-        # Check if contractor exists in SolteqTand database and update contractor if exists.
-        logger.info(
-            "Handling step 6: %s ...",
-            config.DASHBOARD_STEP_6_NAME,
-        )
-        set_context_values(current_step_name=config.DASHBOARD_STEP_6_NAME)
-        validate_contractor()
-
-        # Step 7
-        # Check if clinic data matches and if consent is given. Create journal note in Solteq.
-        logger.info(
-            "Handling step 7: %s ...",
-            config.DASHBOARD_STEP_7_NAME,
-        )
-        set_context_values(current_step_name=config.DASHBOARD_STEP_7_NAME)
-        consent_handler()
-
-        # Update journalizing process status in RPA database
-        update_process_status("Successful")
-    except BusinessError as be:
-        logger.error("Business error occurred: %s", be)
-        update_process_status("Failed")
-        raise be
     except Exception as e:
-        logger.error("Application error occurred: %s", e)
-        update_process_status("Failed")
+        logger.error("Error in consent handler: %s", e)
         raise e

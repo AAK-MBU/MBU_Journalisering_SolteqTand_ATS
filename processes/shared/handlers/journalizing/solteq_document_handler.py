@@ -1,6 +1,7 @@
 """Module to handle document journalizing in SolteqTand"""
 
 import logging
+import time
 
 from mbu_dev_shared_components.solteqtand.database import SolteqTandDatabase
 
@@ -49,6 +50,8 @@ def journalize_document(document_type: str, document_file_name: str):
                 document_type=document_type,
                 document_description=item_reference,
             )
+
+            time.sleep(3)
 
             check_document_journalized = solteq_db_obj.get_list_of_documents(
                 filters=filters

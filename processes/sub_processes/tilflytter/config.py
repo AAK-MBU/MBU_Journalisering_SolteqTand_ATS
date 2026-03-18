@@ -1,7 +1,6 @@
 # ----------------------
 # Document handling settings
 # ----------------------
-DOCUMENT_PATH = "C:\\Temp\\Journalizing\\Documents"
 DOCUMENT_FILE_NAME = "Kvittering_Tilflytter.pdf"
 DOCUMENT_TYPE = "Digital blanket"
 

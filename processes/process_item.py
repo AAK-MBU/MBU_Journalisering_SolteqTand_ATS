@@ -9,8 +9,8 @@ from helpers.context_functions import get_context_values
 from processes.application_handler import close
 from processes.shared.handlers.dashboard_data_handler import handle_process_dashboard
 from processes.shared.utils.clean_up import clean_up
-from processes.sub_processes.tilflytter.handler import process_tilflytter
-from processes.sub_processes.udskrivning_22_aar.handler import (
+from processes.sub_processes.tilflytter.process import process_tilflytter
+from processes.sub_processes.udskrivning_22_aar.process import (
     process_udskrivning_22_aar,
 )
 
@@ -33,7 +33,7 @@ def process_item(item_data: dict, item_reference: str, item_id: str, subprocess:
     except BusinessError as be:
         logger.error("Business error occurred: %s", be)
         handle_process_dashboard(
-            status="failure",
+            status="failed",
             process_step_name=get_context_values("current_step_name"),
             failure=be,
             rerun_config={"workitem_id": item_id},
@@ -42,7 +42,7 @@ def process_item(item_data: dict, item_reference: str, item_id: str, subprocess:
     except Exception as e:
         logger.error("%s", e)
         handle_process_dashboard(
-            status="failure",
+            status="failed",
             process_step_name=get_context_values("current_step_name"),
             failure=e,
         )

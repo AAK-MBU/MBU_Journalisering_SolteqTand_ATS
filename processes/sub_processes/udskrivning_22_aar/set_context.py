@@ -1,5 +1,6 @@
 """Module to set context values for processing"""
 
+from helpers import config as helper_config
 from helpers.context_functions import set_context_values
 
 from . import config
@@ -19,7 +20,7 @@ def set_context_vars(item_data: dict, item_reference: str, item_id: str):
         form_data=item_data.get("form_data", ""),
         consent=bool(item_data.get("samtykke_valg")),
         work_item=item_id,
-        document_file_path=config.DOCUMENT_PATH,
+        document_file_path=helper_config.DOCUMENT_PATH,
         document_file_name=config.DOCUMENT_FILE_NAME,
         process_name=config.DASHBOARD_PROCESS_NAME,
         current_step_name=None,

@@ -1,7 +1,6 @@
 # ----------------------
 # Document handling settings
 # ----------------------
-DOCUMENT_PATH = "C:\\Temp\\Journalizing\\Documents"
 DOCUMENT_FILE_NAME = "Kvittering_Udskrivning_22_år.pdf"
 DOCUMENT_TYPE = "Digital blanket"
 
@@ -9,15 +8,13 @@ DOCUMENT_TYPE = "Digital blanket"
 # Journal note handling settings
 # ----------------------
 ADM_NOTE_TYPE = "Administrativt notat"
-ADM_NOTE_MESSAGE = (
-    "'TEST Anmodning om journalmateriale via digital formular. Se dokumenter'"
-)
+ADM_NOTE_MESSAGE = "'Anmodning om journalmateriale via digital formular. Se dokumenter'"
 
 ADM_NOTE_CONSENT_TYPE = "Administrativt notat"
-ADM_NOTE_CONSENT_MESSAGE = "'TEST Samtykke til afsendelse af journalmateriale'"
+ADM_NOTE_CONSENT_MESSAGE = "'Samtykke til afsendelse af journalmateriale'"
 
 ADM_NOTE_NO_CONSENT_TYPE = "Administrativt notat"
-ADM_NOTE_NO_CONSENT_MESSAGE = "'TEST Ikke samtykke til afsendelse af journalmateriale'"
+ADM_NOTE_NO_CONSENT_MESSAGE = "'Ikke samtykke til afsendelse af journalmateriale'"
 
 # ----------------------
 # Dashboard settings

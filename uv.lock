@@ -360,7 +360,7 @@ wheels = [
 
 [[package]]
 name = "mbu-dev-shared-components"
-version = "4.2.8"
+version = "4.4.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cryptography" },
@@ -368,9 +368,9 @@ dependencies = [
     { name = "pyodbc" },
     { name = "python-dateutil" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/dd/69/615226b4d18eda203d7b737fd9faa55251e58c137ab243fc3ca4facc1eda/mbu_dev_shared_components-4.2.8.tar.gz", hash = "sha256:640314807ebafbe9de1f83deaa0da05374d86245bd2392a2bc044bd9b9d6a009", size = 48759, upload-time = "2025-12-17T14:25:42.177Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/41/0c/7d5a13db6f6b1d8dbb5023c110a051a7b7ccdc2af82c666c89657ef15adc/mbu_dev_shared_components-4.4.2.tar.gz", hash = "sha256:123390b4e2125f2b73445480320211f355b7fb9c2574558fed2fd77e9882208c", size = 50975, upload-time = "2026-03-24T14:00:38.574Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/6a/91/5ef174dd4c3e51f4258ddad0e00848ec91b5895be222bc052b59f9fd47bc/mbu_dev_shared_components-4.2.8-py3-none-any.whl", hash = "sha256:082096ec696d952f68d3130cd5fbd2a84ed815273b8a9e6eabb3dc45973241b6", size = 64476, upload-time = "2025-12-17T14:25:40.014Z" },
+    { url = "https://files.pythonhosted.org/packages/02/12/9300e4b0a315284865316929ebb969bd8d2741719463d1ac1c0f5fec65b1/mbu_dev_shared_components-4.4.2-py3-none-any.whl", hash = "sha256:b77d86450e78e48427c62ae49a44e52b4e45083f562366269589a782d6afe486", size = 67447, upload-time = "2026-03-24T14:00:37.104Z" },
 ]
 
 [package.optional-dependencies]
@@ -418,7 +418,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "automation-server-client", git = "https://github.com/odense-rpa/automation-server-client.git?tag=v0.2.0" },
-    { name = "mbu-dev-shared-components", extras = ["solteqtand", "romexis", "utils", "os2forms"], specifier = "==4.2.8" },
+    { name = "mbu-dev-shared-components", extras = ["solteqtand", "romexis", "utils", "os2forms"], specifier = "==4.4.2" },
     { name = "mbu-process-dashboard-shared-components", specifier = "==1.4.0" },
     { name = "mbu-rpa-core" },
     { name = "pillow" },

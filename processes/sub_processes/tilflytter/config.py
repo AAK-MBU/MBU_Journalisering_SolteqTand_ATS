@@ -8,23 +8,25 @@ DOCUMENT_TYPE = "Digital blanket"
 # Journal note handling settings
 # ----------------------
 ADM_NOTE_TYPE = "Administrativt notat"
-ADM_NOTE_MESSAGE = "'Tilflytter - Digital formular er udfyldt. Se Dokumenter'"
+ADM_NOTE_MESSAGE = "'15592_4 - Tilflytter - Digital formular er udfyldt. Se Dokumenter'"
 
 ADM_NOTE_CONSENT_TYPE = "Administrativt notat"
-ADM_NOTE_CONSENT_MESSAGE = "'Samtykke til at indhente journal fra tidligere tandklinik'"
+ADM_NOTE_CONSENT_MESSAGE = (
+    "'15592_4 - Samtykke til at indhente journal fra tidligere tandklinik'"
+)
 
 ADM_NOTE_NO_CONSENT_TYPE = "Administrativt notat"
 ADM_NOTE_NO_CONSENT_MESSAGE = (
-    "'Ikke samtykke til at indhente journal fra tidligere tandklinik'"
+    "'15592_4 - Ikke samtykke til at indhente journal fra tidligere tandklinik'"
 )
 
 DIAGNOSE_NOTE_CONSENT_TYPE = "Ja"
-DIAGNOSE_NOTE_CONSENT_MESSAGE = "'Generelt samtykke'"
+DIAGNOSE_NOTE_CONSENT_MESSAGE = "'15592_4 - Generelt samtykke'"
 DIAGNOSE_SUB_NOTE_CONSENT_TYPE = "Informeret samtykke"
-DIAGNOSE_SUB_NOTE_CONSENT_MESSAGE = "'Forældremyndighedsindehaver har på baggrund af skriftlig information i formular til tilflytter givet generelt, udtrykkeligt samtykke til fluoridbehandlinger, fissurforseglinger og røntgenundersøgelser på indikation'"
+DIAGNOSE_SUB_NOTE_CONSENT_MESSAGE = "'15592_4 - Forældremyndighedsindehaver har på baggrund af skriftlig information i formular til tilflytter givet generelt, udtrykkeligt samtykke til fluoridbehandlinger, fissurforseglinger og røntgenundersøgelser på indikation'"
 
 DIAGNOSE_NOTE_NO_CONSENT_TYPE = "Nej"
-DIAGNOSE_NOTE_NO_CONSENT_MESSAGE = "'til generelt samtykke. Forældremyndighedsindehaver har på baggrund af skriftlig information i formular til tilflytter ikke givet generelt, udtrykkeligt samtykke til fluoridbehandlinger, fissurforseglinger og røntgenundersøgelser på indikation'"
+DIAGNOSE_NOTE_NO_CONSENT_MESSAGE = "'15592_4 - til generelt samtykke. Forældremyndighedsindehaver har på baggrund af skriftlig information i formular til tilflytter ikke givet generelt, udtrykkeligt samtykke til fluoridbehandlinger, fissurforseglinger og røntgenundersøgelser på indikation'"
 
 
 # ----------------------

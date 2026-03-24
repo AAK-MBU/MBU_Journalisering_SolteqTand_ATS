@@ -4,7 +4,7 @@ import logging
 
 from mbu_dev_shared_components.solteqtand.application import SolteqTandApp
 
-from helpers.context_functions import get_context_values
+from helpers.context_functions import get_context_values, set_context_values
 from processes.shared.handlers.journalizing.solteq_note_handler import (
     create_journalnote,
     create_sub_note,
@@ -47,11 +47,12 @@ def consent_tilflytter_handler() -> None:
     if consent_treatment:
         create_journalnote(
             journal_note_message=config.DIAGNOSE_NOTE_CONSENT_MESSAGE,
-            checkmark_in_complete=True,
+            checkmark_in_complete=False,
             note_type=config.DIAGNOSE_NOTE_CONSENT_TYPE,
         )
         create_sub_note(
-            parent_note="",
+            parent_note_message=config.DIAGNOSE_NOTE_CONSENT_MESSAGE,
+            parent_note_type=config.DIAGNOSE_NOTE_CONSENT_TYPE,
             sub_note_message=config.DIAGNOSE_SUB_NOTE_CONSENT_MESSAGE,
             sub_note_type=config.DIAGNOSE_SUB_NOTE_CONSENT_TYPE,
             checkmark_in_complete=True,
@@ -83,8 +84,15 @@ def solteq_journal_update_handler(solteq_app: SolteqTandApp) -> None:
 
     # Create event in SolteqTand
     try:
+        # Temp workaround if clinic name is not provided in form, as clinic name is required to create event in SolteqTand.
+        # Clinic name should be provided in form in future, and default value can be removed.
+        if not get_context_values("clinic_name"):
+            clinic_name = "Tandplejen Aarhus"
+        else:
+            clinic_name = get_context_values("clinic_name")
+
         solteq_app.create_new_event(
-            clinic_name=get_context_values("clinic_name"),
+            clinic_name=clinic_name,
             event_text=config.EVENT_TEXT,
         )
     except Exception as e:

@@ -44,6 +44,9 @@ def create_journalnote(
 
         journal_note_exists = solteq_db_obj.get_list_of_journal_notes(filters=filters)
         note_message = f"{note_type} {journal_note_message}"
+
+        logger.info("Note message to create: %s", note_message)
+
         if not journal_note_exists:
             solteq_app.create_journal_note(
                 note_message=note_message,
@@ -76,7 +79,8 @@ def create_journalnote(
 
 
 def create_sub_note(
-    parent_note: str,
+    parent_note_message: str,
+    parent_note_type: str,
     sub_note_message: str,
     sub_note_type: str,
     checkmark_in_complete: bool,
@@ -105,8 +109,9 @@ def create_sub_note(
         journal_note_exists = solteq_db_obj.get_list_of_journal_notes(filters=filters)
         if not journal_note_exists:
             solteq_app.create_journal_sub_note(
-                parent_note=parent_note,
-                note_message=sub_note_message,
+                parent_note_message=parent_note_message,
+                parent_note_type=parent_note_type,
+                note_message=f"{sub_note_type} {sub_note_message}",
                 checkmark_in_complete=checkmark_in_complete,
             )
         else:

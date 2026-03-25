@@ -4,7 +4,7 @@ import logging
 
 from mbu_dev_shared_components.solteqtand.application import SolteqTandApp
 
-from helpers.context_functions import get_context_values, set_context_values
+from helpers.context_functions import get_context_values
 from processes.shared.handlers.journalizing.solteq_note_handler import (
     create_journalnote,
     create_sub_note,

@@ -44,7 +44,11 @@ def clear_context() -> None:
 
 
 class Scope:
-    """Context manager to temporarily set the run context."""
+    """
+    Context manager for managing a scope of context values.
+    If `fresh` is True, the context will be reset to an empty dictionary for the duration of the scope.
+    Any provided `overrides` will be applied on top of the base context (or fresh context) for the duration of the scope.
+    """
 
     def __init__(self, fresh: bool = False, **overrides: Any) -> None:
         self.fresh = fresh

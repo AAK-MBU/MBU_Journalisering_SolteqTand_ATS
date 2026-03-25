@@ -1,18 +1,20 @@
 [project]
 name = "mbu-journalisering-solteqtand-ats"
-version = "0.1.10"
+version = "0.2.0"
 description = "Journaliseringsmodul til Solteq Tand ATS"
 tags = ["ats"]
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "automation-server-client @ git+https://github.com/odense-rpa/automation-server-client.git",
-    "mbu-dev-shared-components[solteqtand, romexis, utils, os2forms]==4.2.8",
+    "mbu-dev-shared-components[solteqtand, romexis, utils, os2forms]==4.4.2",
+    "mbu-process-dashboard-shared-components==1.4.0",
     "mbu-rpa-core",
     "pillow",
     "ruff",
     "sqlalchemy",
     "pyodbc",
+    "pytest",
 ]
 
 [tool.uv.sources]
@@ -58,6 +60,10 @@ select = [
 [tool.ruff.format]
 # Use the formatter; CI step already checks it with `ruff format --check .`
 
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
 [tool.pyright]
 include = ["."]
 exclude = [
@@ -69,4 +75,9 @@ exclude = [
 ]
 pythonVersion = "3.13"
 typeCheckingMode = "basic"   # or "basic"
-reportMissingTypeStubs = true
+reportMissingTypeStubs = false
+
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+]

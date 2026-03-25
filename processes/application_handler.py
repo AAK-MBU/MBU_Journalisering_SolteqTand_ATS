@@ -51,11 +51,19 @@ def soft_close():
 
     logger.info("Closing Solteq Tand application softly...")
     application = get_app()
+    if application is None:
+        logger.warning("No application instance to close")
+        return
+
     try:
         application.close_solteq_tand()
         logger.info("Closed application softly")
+    except AssertionError as e:
+        logger.warning(
+            "Soft close failed with assertion error (will force close): %s", e
+        )
     except Exception as e:
-        logger.error("Could not close application softly: %s", e)
+        logger.warning("Could not close application softly (will force close): %s", e)
 
 
 def hard_close(application: str):

@@ -2,6 +2,7 @@
 This is the main entry point for the process
 """
 
+import argparse
 import asyncio
 import logging
 import sys
@@ -11,13 +12,14 @@ from mbu_rpa_core.exceptions import BusinessError, ProcessError
 from mbu_rpa_core.process_states import CompletedState
 
 from helpers import ats_functions, config
-from helpers.context_handler import Scope
+from helpers.config import SUBPROCESS_CHOICES
+from helpers.context_functions import Scope
 from processes.application_handler import close, reset, startup
 from processes.error_handling import ErrorContext, handle_error
 from processes.finalize_process import finalize_process
 from processes.process_item import process_item
 from processes.queue_handler import concurrent_add, retrieve_items_for_queue
-from processes.sub_processes.clean_up import clean_up
+from processes.shared.utils.clean_up import clean_up
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +49,7 @@ async def populate_queue(workqueue: Workqueue):
     logger.info("Finished populating workqueue.")
 
 
-async def process_workqueue(workqueue: Workqueue):
+async def process_workqueue(workqueue: Workqueue, subprocess: str):
     """Process items from the workqueue."""
 
     logger.info("Processing workqueue...")
@@ -74,7 +76,7 @@ async def process_workqueue(workqueue: Workqueue):
 
                         # Process the item within a fresh context
                         with Scope(fresh=True):
-                            process_item(item_data, item_reference, item_id)
+                            process_item(item_data, item_reference, item_id, subprocess)
 
                         completed_state = CompletedState.completed(
                             "Process completed without exceptions"
@@ -152,13 +154,38 @@ if __name__ == "__main__":
     prod_workqueue = ats.workqueue()
     process = ats.process
 
-    if "--queue" in sys.argv:
+    # Argument parsing to determine which part of the process to run
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--queue",
+        action="store_true",
+        help="Populate the workqueue with items to be processed.",
+    )
+    parser.add_argument(
+        "--process",
+        action="store_true",
+        help="Process items from the workqueue.",
+    )
+    parser.add_argument(
+        "--finalize",
+        action="store_true",
+        help="Finalize the process after processing items.",
+    )
+    parser.add_argument(
+        "--subprocess",
+        choices=SUBPROCESS_CHOICES,
+        help="Specify the subprocess to run when processing items.",
+        required=True,
+    )
+    args = parser.parse_args()
+
+    if args.queue:
         asyncio.run(populate_queue(prod_workqueue))
 
-    if "--process" in sys.argv:
-        asyncio.run(process_workqueue(prod_workqueue))
+    if args.process:
+        asyncio.run(process_workqueue(prod_workqueue, args.subprocess))
 
-    if "--finalize" in sys.argv:
+    if args.finalize:
         asyncio.run(finalize(prod_workqueue))
 
     sys.exit(0)

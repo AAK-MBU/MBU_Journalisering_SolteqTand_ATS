@@ -32,7 +32,7 @@ python main.py --subprocess <subprocess> [--queue] [--process] [--finalize]
 | `--process` | Pick up items from the workqueue and run the automation |
 | `--finalize` | Run any post-processing/finalization steps after the queue is done |
 
-**Required argument:**
+**Required argument for process:**
 
 | Argument | Choices | Description |
 |---|---|---|
@@ -42,13 +42,13 @@ python main.py --subprocess <subprocess> [--queue] [--process] [--finalize]
 
 ```bash
 # Populate the queue for the tilflytter sub-process
-python main.py --subprocess tilflytter --queue
+python main.py --queue
 
 # Process queued items for udskrivning22ar
-python main.py --subprocess udskrivning22ar --process
+python main.py --process --subprocess udskrivning22ar
 
 # Run all three phases in sequence for tilflytter
-python main.py --subprocess tilflytter --queue --process --finalize
+python main.py --process --subprocess tilflytter
 ```
 
 ### Requirements

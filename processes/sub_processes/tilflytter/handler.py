@@ -84,10 +84,8 @@ def solteq_journal_update_handler(solteq_app: SolteqTandApp) -> None:
 
     # Create event in SolteqTand
     try:
-        # Temp workaround if clinic name is not provided in form, as clinic name is required to create event in SolteqTand.
-        # Clinic name should be provided in form in future, and default value can be removed.
         if not get_context_values("clinic_name"):
-            clinic_name = "Tandplejen Aarhus"
+            clinic_name = "* Ukendt klinik"
         else:
             clinic_name = get_context_values("clinic_name")
 

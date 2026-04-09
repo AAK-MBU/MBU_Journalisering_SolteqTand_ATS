@@ -1,3 +1,5 @@
+"""Configuration settings for the Tilflytter process."""
+
 # ----------------------
 # Document handling settings
 # ----------------------

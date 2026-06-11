@@ -1,3 +1,5 @@
+"""Handler for the consent step in the Udskrivning 22 år process."""
+
 import logging
 import os
 

@@ -1,4 +1,4 @@
-"""Handler for the 'Tilflytter' process."""
+"""Process module for handling the 'Tilflytter' subprocess."""
 
 import logging
 
@@ -35,7 +35,9 @@ def process_tilflytter(item_data: dict, item_reference: str, item_id: str):
         release_keys()
 
         # Set context variables for further processing
-        set_context_vars(item_data, item_reference, item_id)
+        set_context_vars(
+            item_data=item_data, item_reference=item_reference, item_id=item_id
+        )
         set_context_values(current_step_name=config.DASHBOARD_STEP_6_NAME)
 
         logger.info(

@@ -236,3 +236,58 @@ def validate_contractor():
     except Exception as e:
         logger.error("Error validating contractor: %s", e)
         raise e
+
+
+def check_extern_clinic_deal(contractor_id: str) -> None:
+    """Check if extern clinic has a valid deal with Aarhus Kommune.
+
+    Args:
+        contractor_id (str): Unique identifier for the contractor
+
+    Raises:
+        ValueError: If contractor ID is missing or if extern clinic does not have a deal with Aarhus Kommune
+        TypeError: If db_conn does not have the required attribute or method
+        RuntimeError: If there is an error during database operation
+    """
+    if not contractor_id or not isinstance(contractor_id, str):
+        raise ValueError("Contractor ID is required to check extern clinic deal.")
+
+    db_conn = SolteqTandDatabase(
+        conn_str=get_rpa_constant("solteq_tand_db_connstr").value
+    )
+
+    filter_params = {
+        "type": "3",
+        "contractorId": contractor_id,
+    }
+
+    try:
+        logger.info(
+            "Checking if extern clinic has a deal with Aarhus Kommune with contractorId: %s",
+            contractor_id,
+        )
+        result = db_conn.get_list_of_clinics(filters=filter_params)
+    except RuntimeError as re:
+        logger.error(
+            "Runtime error occurred while checking extern clinic deal for contractor %s: %s",
+            contractor_id,
+            str(re),
+        )
+        raise
+    except Exception as e:
+        logger.error(
+            "Unexpected error occurred while checking extern clinic deal for contractor %s: %s",
+            contractor_id,
+            str(e),
+        )
+        raise
+
+    if not result:
+        logger.error(
+            "No deal found for extern clinic with contractorId: %s.",
+            contractor_id,
+        )
+        raise ValueError("Extern clinic does not have a deal with Aarhus Kommune.")
+        #  raise CancelledError("Extern clinic does not have a deal with Aarhus Kommune.")
+
+    logger.info("Extern clinic has a deal with Aarhus Kommune.")

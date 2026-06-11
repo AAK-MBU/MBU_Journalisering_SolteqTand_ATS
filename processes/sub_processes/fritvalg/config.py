@@ -1,9 +1,7 @@
-"""Configuration settings for the Udskrivning 22 år process."""
-
 # ----------------------
 # Document handling settings
 # ----------------------
-DOCUMENT_FILE_NAME = "Kvittering_Udskrivning_22_år.pdf"
+DOCUMENT_FILE_NAME = "Kvittering_fritvalg.pdf"
 DOCUMENT_TYPE = "Digital blanket"
 
 # ----------------------
@@ -21,8 +19,8 @@ ADM_NOTE_NO_CONSENT_MESSAGE = "'Ikke samtykke til afsendelse af journalmateriale
 # ----------------------
 # Dashboard settings
 # ----------------------
-DASHBOARD_PROCESS_NAME = "Udskrivning 22 år"
-DASHBOARD_STEP_4_NAME = "Formular indsendt"
-DASHBOARD_STEP_5_NAME = "Formular journaliseret"
-DASHBOARD_STEP_6_NAME = "Tandklinik registreret i Solteq"
-DASHBOARD_STEP_7_NAME = "Samtykke"
+DASHBOARD_PROCESS_NAME = "Fritvalg"
+DASHBOARD_STEP_2_NAME = "Formular journaliseret"
+DASHBOARD_STEP_3_NAME = "Tandklinik registreret i Solteq"
+DASHBOARD_STEP_4_NAME = "Klinik med aftale"
+DASHBOARD_STEP_5_NAME = "Samtykke"

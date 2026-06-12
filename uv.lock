@@ -360,7 +360,7 @@ wheels = [
 
 [[package]]
 name = "mbu-dev-shared-components"
-version = "4.4.2"
+version = "4.4.6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cryptography" },
@@ -368,9 +368,9 @@ dependencies = [
     { name = "pyodbc" },
     { name = "python-dateutil" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/41/0c/7d5a13db6f6b1d8dbb5023c110a051a7b7ccdc2af82c666c89657ef15adc/mbu_dev_shared_components-4.4.2.tar.gz", hash = "sha256:123390b4e2125f2b73445480320211f355b7fb9c2574558fed2fd77e9882208c", size = 50975, upload-time = "2026-03-24T14:00:38.574Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/6f/3d/5851b31b760ccdceaa41246a0ebad90c67ac47b4db8290cbbd77754f72a1/mbu_dev_shared_components-4.4.6.tar.gz", hash = "sha256:a03d4dead7ce957e22840b6bcac10c66bc5e93053b047016bc32a4183020228e", size = 51457, upload-time = "2026-06-08T17:49:17.308Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/02/12/9300e4b0a315284865316929ebb969bd8d2741719463d1ac1c0f5fec65b1/mbu_dev_shared_components-4.4.2-py3-none-any.whl", hash = "sha256:b77d86450e78e48427c62ae49a44e52b4e45083f562366269589a782d6afe486", size = 67447, upload-time = "2026-03-24T14:00:37.104Z" },
+    { url = "https://files.pythonhosted.org/packages/26/00/055ceba84d2f1bc811bfe75c3a4cb4d7e1ae09f1748b49c69cb6e1bfe9bc/mbu_dev_shared_components-4.4.6-py3-none-any.whl", hash = "sha256:eacdae4f26a49e0e5faefd8b4ae53efe9ea995d4d1b54cf9c584b1378f9dd885", size = 67973, upload-time = "2026-06-08T17:49:15.926Z" },
 ]
 
 [package.optional-dependencies]
@@ -396,7 +396,7 @@ utils = [
 
 [[package]]
 name = "mbu-journalisering-solteqtand-ats"
-version = "0.1.10"
+version = "0.3.1"
 source = { virtual = "." }
 dependencies = [
     { name = "automation-server-client" },
@@ -418,7 +418,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "automation-server-client", git = "https://github.com/odense-rpa/automation-server-client.git?tag=v0.2.0" },
-    { name = "mbu-dev-shared-components", extras = ["solteqtand", "romexis", "utils", "os2forms"], specifier = "==4.4.2" },
+    { name = "mbu-dev-shared-components", extras = ["solteqtand", "romexis", "utils", "os2forms"], specifier = "==4.4.6" },
     { name = "mbu-process-dashboard-shared-components", specifier = "==1.4.0" },
     { name = "mbu-rpa-core" },
     { name = "pillow" },

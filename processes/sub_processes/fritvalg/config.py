@@ -19,7 +19,7 @@ ADM_NOTE_NO_CONSENT_MESSAGE = "'Ikke samtykke til afsendelse af journalmateriale
 # ----------------------
 # Dashboard settings
 # ----------------------
-DASHBOARD_PROCESS_NAME = "Fritvalg"
+DASHBOARD_PROCESS_NAME = "Frit valg"
 DASHBOARD_STEP_2_NAME = "Formular journaliseret"
 DASHBOARD_STEP_3_NAME = "Tandklinik registreret i Solteq"
 DASHBOARD_STEP_4_NAME = "Klinik med aftale"

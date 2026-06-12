@@ -9,6 +9,7 @@ from helpers.context_functions import get_context_values
 from processes.application_handler import close
 from processes.shared.handlers.dashboard_data_handler import handle_process_dashboard
 from processes.shared.utils.clean_up import clean_up
+from processes.sub_processes.fritvalg.process import process_fritvalg
 from processes.sub_processes.tilflytter.process import process_tilflytter
 from processes.sub_processes.udskrivning_22_aar.process import (
     process_udskrivning_22_aar,
@@ -26,9 +27,23 @@ def process_item(item_data: dict, item_reference: str, item_id: str, subprocess:
             )
 
         if subprocess == "udskrivning22ar":
-            process_udskrivning_22_aar(item_data, item_reference, item_id)
+            process_udskrivning_22_aar(
+                item_data=item_data,
+                item_reference=item_reference,
+                item_id=item_id,
+            )
         elif subprocess == "tilflytter":
-            process_tilflytter(item_data, item_reference, item_id)
+            process_tilflytter(
+                item_data=item_data,
+                item_reference=item_reference,
+                item_id=item_id,
+            )
+        elif subprocess == "fritvalg":
+            process_fritvalg(
+                item_data=item_data,
+                item_reference=item_reference,
+                item_id=item_id,
+            )
 
     except BusinessError as be:
         logger.error("Business error occurred: %s", be)

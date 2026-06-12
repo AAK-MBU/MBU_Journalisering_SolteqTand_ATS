@@ -1,13 +1,13 @@
 [project]
 name = "mbu-journalisering-solteqtand-ats"
-version = "0.3.9"
+version = "0.3.10"
 description = "Journaliseringsmodul til Solteq Tand ATS"
 tags = ["ats"]
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "automation-server-client @ git+https://github.com/odense-rpa/automation-server-client.git",
-    "mbu-dev-shared-components[solteqtand, romexis, utils, os2forms]==4.4.7",
+    "mbu-dev-shared-components[solteqtand, romexis, utils, os2forms]==4.4.8",
     "mbu-process-dashboard-shared-components==1.4.0",
     "mbu-rpa-core",
     "pillow",

@@ -5,7 +5,7 @@ MAX_RETRY = 10
 # ----------------------
 # Subprocess settings
 # ----------------------
-SUBPROCESS_CHOICES = ["udskrivning22ar", "tilflytter"]
+SUBPROCESS_CHOICES = ["udskrivning22ar", "tilflytter", "fritvalg"]
 
 # ----------------------
 # Queue population settings

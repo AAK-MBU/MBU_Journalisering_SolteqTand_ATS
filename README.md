@@ -36,7 +36,7 @@ python main.py --subprocess <subprocess> [--queue] [--process] [--finalize]
 
 | Argument | Choices | Description |
 |---|---|---|
-| `--subprocess` | `tilflytter`, `udskrivning22ar` | Selects which sub-process logic to execute |
+| `--subprocess` | `tilflytter`, `udskrivning22ar`, `fritvalg` | Selects which sub-process logic to execute |
 
 **Examples:**
 
@@ -46,9 +46,6 @@ python main.py --queue
 
 # Process queued items for udskrivning22ar
 python main.py --process --subprocess udskrivning22ar
-
-# Run all three phases in sequence for tilflytter
-python main.py --process --subprocess tilflytter
 ```
 
 ### Requirements

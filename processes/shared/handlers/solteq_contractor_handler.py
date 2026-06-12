@@ -157,9 +157,8 @@ def validate_contractor():
         if not match_result["success"]:
             contractor_lookup_error = {
                 "type": "BusinessError",
-                "message": f"""Vi kunne ikke matche den valgte tandklinik med en klinik i Solteq – hverken via ydernummer eller telefonnummer.
-                Detaljer: {match_result["error"]}
-                Kontakt Tandplejens administration, tandplejen@mbu.aarhus.dk, og bed om at få undersøgt,
+                "message": """Vi kunne ikke matche den valgte tandklinik med en klinik i Solteq – hverken via ydernummer eller telefonnummer.
+                Detaljer: Kontakt Tandplejens administration, tandplejen@mbu.aarhus.dk, og bed om at få undersøgt,
                 om tandklinikken er oprettet i Solteq eller om den mangler oplysninger om ydernummer eller telefonnummer, der matcher det i EDI.
                 Afvent svar.
                 Du kan genstarte processen, når klinikken er oprettet eller dens oplysninger er rettet i Solteq.""",

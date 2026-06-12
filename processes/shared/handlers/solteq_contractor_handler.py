@@ -251,9 +251,7 @@ def check_extern_clinic_deal(contractor_id: str) -> None:
     if not contractor_id or not isinstance(contractor_id, str):
         raise ValueError("Contractor ID is required to check extern clinic deal.")
 
-    db_conn = SolteqTandDatabase(
-        conn_str=get_rpa_constant("solteq_tand_db_connstr").value
-    )
+    db_conn = SolteqTandDatabase(conn_str=get_rpa_constant("solteq_tand_db_connstr"))
 
     filter_params = {
         "type": "3",

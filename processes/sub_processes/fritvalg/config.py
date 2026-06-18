@@ -24,3 +24,9 @@ DASHBOARD_STEP_2_NAME = "Formular journaliseret"
 DASHBOARD_STEP_3_NAME = "Tandklinik registreret i Solteq"
 DASHBOARD_STEP_4_NAME = "Klinik med aftale"
 DASHBOARD_STEP_5_NAME = "Samtykke"
+
+# ----------------------
+# Event settings
+# ----------------------
+CLINIC_NAME = "Tandplejen Aarhus - Kontaktcenter"
+EVENT_MESSAGE = "Frit valg - Digital formular udfyldt"

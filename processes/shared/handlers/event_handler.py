@@ -5,7 +5,7 @@ import datetime
 import logging
 from zoneinfo import ZoneInfo
 
-from dateutil import relativedelta
+from dateutil.relativedelta import relativedelta
 from mbu_dev_shared_components.solteqtand.database import SolteqTandDatabase
 
 from helpers.context_functions import get_context_values

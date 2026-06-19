@@ -17,6 +17,7 @@ from processes.shared.handlers.solteq_contractor_handler import (
 from processes.shared.utils.clean_up import release_keys
 from processes.sub_processes.fritvalg.handler import (
     consent_fritvalg_handler,
+    create_receipt_journal_note,
 )
 from processes.sub_processes.fritvalg.set_context import set_context_vars
 
@@ -77,6 +78,9 @@ def process_fritvalg(
             document_file_name=config.DOCUMENT_FILE_NAME,
         )
 
+        # Create journal note linked to the receipt.
+        create_receipt_journal_note()
+
         handle_process_dashboard(
             status="success",
             process_step_name=get_context_values("current_step_name"),
@@ -117,7 +121,7 @@ def process_fritvalg(
         )
 
         # Step 5
-        # Check if clinic data matches and if consent is given. Create journal note in Solteq.
+        # Check if clinic data matches and if consent is given.
         set_context_values(current_step_name=config.DASHBOARD_STEP_5_NAME)
 
         logger.info(

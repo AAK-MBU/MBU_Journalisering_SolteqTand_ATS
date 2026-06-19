@@ -8,7 +8,7 @@ DOCUMENT_TYPE = "Digital blanket"
 # Journal note handling settings
 # ----------------------
 ADM_NOTE_TYPE = "Administrativt notat"
-ADM_NOTE_MESSAGE = "'Anmodning om journalmateriale via digital formular. Kvittering sendt til patient. Se dokumenter'"
+ADM_NOTE_MESSAGE = "'Anmodning om frit valg via digital formular. Kvittering sendt til patient. Se dokumenter'"
 
 ADM_NOTE_CONSENT_TYPE = "Administrativt notat"
 ADM_NOTE_CONSENT_MESSAGE = "'Samtykke til afsendelse af journalmateriale'"

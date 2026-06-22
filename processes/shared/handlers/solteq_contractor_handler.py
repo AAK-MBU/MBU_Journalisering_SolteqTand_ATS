@@ -282,7 +282,10 @@ def check_extern_clinic_deal(contractor_id: str) -> None:
             "No deal found for extern clinic with contractorId: %s.",
             contractor_id,
         )
-        raise ValueError("Extern clinic does not have a deal with Aarhus Kommune.")
+        #  raise ValueError("Extern clinic does not have a deal with Aarhus Kommune.")
         #  raise CancelledError("Extern clinic does not have a deal with Aarhus Kommune.")
+        raise BusinessError(
+            "Den eksterne klinik har ikke en aftale med Aarhus Kommune."
+        )
 
     logger.info("Extern clinic has a deal with Aarhus Kommune.")

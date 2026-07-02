@@ -36,7 +36,9 @@ def _more_than_one_clinic_found_error(provider_number=None, phone_number=None):
     )
 
 
-def _resolve_clinics(clinics: list, check_fields: list, provider_number=None, phone_number=None) -> list:
+def _resolve_clinics(
+    clinics: list, check_fields: list, provider_number=None, phone_number=None
+) -> list:
     """Return a single-element list if all multiple matches are duplicates of the same clinic.
 
     Clinics are considered duplicates when all check_fields values are identical across
@@ -51,7 +53,9 @@ def _resolve_clinics(clinics: list, check_fields: list, provider_number=None, ph
             " and ".join(check_fields),
         )
         return [clinics[0]]
-    _more_than_one_clinic_found_error(provider_number=provider_number, phone_number=phone_number)
+    _more_than_one_clinic_found_error(
+        provider_number=provider_number, phone_number=phone_number
+    )
 
 
 def _try_match_by_provider_and_phone(
@@ -67,7 +71,12 @@ def _try_match_by_provider_and_phone(
         c for c in clinics_by_provider if c.get("phoneNumber") == phone_number
     ]
     if len(matching_clinics) > 1:
-        return _resolve_clinics(matching_clinics, ["streetAddress"], provider_number=provider_number, phone_number=phone_number)
+        return _resolve_clinics(
+            matching_clinics,
+            ["streetAddress"],
+            provider_number=provider_number,
+            phone_number=phone_number,
+        )
     elif len(matching_clinics) == 1:
         return matching_clinics
     return None
@@ -77,7 +86,9 @@ def _try_match_by_provider(database: SolteqTandDatabase, provider_number):
     """Match clinic by provider number only."""
     clinics = database.get_list_of_clinics(filters={"contractorId": provider_number})
     if len(clinics) > 1:
-        return _resolve_clinics(clinics, ["streetAddress", "phoneNumber"], provider_number=provider_number)
+        return _resolve_clinics(
+            clinics, ["streetAddress", "phoneNumber"], provider_number=provider_number
+        )
     elif len(clinics) == 1:
         return clinics
     return None
@@ -87,7 +98,9 @@ def _try_match_by_phone(database: SolteqTandDatabase, phone_number):
     """Match clinic by phone number only."""
     clinics = database.get_list_of_clinics(filters={"phoneNumber": phone_number})
     if len(clinics) > 1:
-        return _resolve_clinics(clinics, ["streetAddress", "contractorId"], phone_number=phone_number)
+        return _resolve_clinics(
+            clinics, ["streetAddress", "contractorId"], phone_number=phone_number
+        )
     elif len(clinics) == 1:
         return clinics
     return None
@@ -186,7 +199,9 @@ def _check_clinic_in_edi_portal(solteq_app, matched_clinic: dict) -> None:
         contractor_id = matched_clinic.get("contractorId", "")
         phone_number = matched_clinic.get("phoneNumber", "")
 
-        extern_clinic_data = [{"contractorId": contractor_id, "phoneNumber": phone_number}]
+        extern_clinic_data = [
+            {"contractorId": contractor_id, "phoneNumber": phone_number}
+        ]
         result = solteq_app.edi_portal_check_contractor_id(extern_clinic_data)
 
         if result is None:
@@ -194,9 +209,7 @@ def _check_clinic_in_edi_portal(solteq_app, matched_clinic: dict) -> None:
 
         user_provider_number = get_context_values("clinic_provider_number")
         user_phone_number = get_context_values("clinic_phone_number")
-        user_info = (
-            f"Bruger oplyste: ydernummer='{user_provider_number}', telefonnummer='{user_phone_number}'"
-        )
+        user_info = f"Bruger oplyste: ydernummer='{user_provider_number}', telefonnummer='{user_phone_number}'"
 
         if result["rowCount"] == 0:
             logger.warning("Matched clinic not found in EDI portal.")

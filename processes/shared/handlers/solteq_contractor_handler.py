@@ -138,9 +138,7 @@ def match_clinic():
         )
 
         solteq_db_conn = get_rpa_constant("srvapptmtsql03_connection_string")
-        database = SolteqTandDatabase(
-            solteq_db_conn
-        )
+        database = SolteqTandDatabase(solteq_db_conn)
 
         if provider_number and phone_number:
             logger.info("Searching by both provider number and phone number.")
@@ -268,8 +266,7 @@ def validate_contractor():
         # Verify the matched clinic exists in the EDI portal and its phone number matches
         _check_clinic_in_edi_portal(solteq_app, matched_clinic)
 
-        # solteq_db_conn = get_rpa_constant("srvapptmtsql03_connection_string")
-        solteq_db_conn = str(os.getenv("SOLTEQ_TAND_DB_CONNSTR"))
+        solteq_db_conn = get_rpa_constant("srvapptmtsql03_connection_string")
 
         solteq_db_obj = SolteqTandDatabase(conn_str=solteq_db_conn)
         filters = {

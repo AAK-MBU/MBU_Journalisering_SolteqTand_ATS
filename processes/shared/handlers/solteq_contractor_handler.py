@@ -1,7 +1,6 @@
 """Module to handle Solteq contractor operations."""
 
 import logging
-import os
 
 from mbu_dev_shared_components.solteqtand.database import SolteqTandDatabase
 from mbu_rpa_core.exceptions import BusinessError
@@ -138,8 +137,9 @@ def match_clinic():
             phone_number,
         )
 
+        solteq_db_conn = get_rpa_constant("srvapptmtsql03_connection_string")
         database = SolteqTandDatabase(
-            os.environ.get("DBCONNECTIONSTRINGSOLTEQTAND", "")
+            solteq_db_conn
         )
 
         if provider_number and phone_number:

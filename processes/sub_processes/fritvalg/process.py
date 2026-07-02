@@ -2,7 +2,11 @@
 
 import logging
 
-from helpers.context_functions import get_context_values, set_context_values
+from helpers.context_functions import (
+    get_context,
+    get_context_values,
+    set_context_values,
+)
 from processes.application_handler import get_app
 from processes.shared.handlers.dashboard_data_handler import handle_process_dashboard
 from processes.shared.handlers.event_handler import create_event
@@ -94,6 +98,9 @@ def process_fritvalg(
             "Handling step 3: %s ...",
             config.DASHBOARD_STEP_3_NAME,
         )
+
+        # just before raise SystemError(...)
+        logger.info("Current context vars: %s", get_context())
 
         validate_contractor()
 

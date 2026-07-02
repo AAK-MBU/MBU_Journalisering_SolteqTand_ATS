@@ -20,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 def process_item(item_data: dict, item_reference: str, item_id: str, subprocess: str):
     """Function to handle item processing"""
+
     success = False
     try:
         if subprocess not in SUBPROCESS_CHOICES:

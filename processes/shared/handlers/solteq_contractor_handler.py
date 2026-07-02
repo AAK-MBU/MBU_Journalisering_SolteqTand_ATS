@@ -14,67 +14,106 @@ from processes.shared.handlers.dashboard_data_handler import handle_process_dash
 logger = logging.getLogger(__name__)
 
 
-def _more_than_one_clinic_found_error():
-    """Raise error when multiple clinics are found."""
-    error_message = (
-        "Fandt flere klinikker i Solteq med samme ydernummer eller telefonnummer."
+def _all_same_values(clinics: list, fields: list) -> bool:
+    """Return True if all clinics share identical values for every field in fields."""
+    value_sets = {tuple(c.get(f) for f in fields) for c in clinics}
+    return len(value_sets) == 1
+
+
+def _more_than_one_clinic_found_error(provider_number=None, phone_number=None):
+    """Raise BusinessError when multiple clinics match the given search values."""
+    if provider_number and phone_number:
+        detail = f"ydernummer '{provider_number}' og telefonnummer '{phone_number}'"
+    elif provider_number:
+        detail = f"ydernummer '{provider_number}'"
+    else:
+        detail = f"telefonnummer '{phone_number}'"
+    logger.error("Multiple clinics found in SolteqTand database for %s.", detail)
+    raise BusinessError(
+        f"Fandt flere klinikker i Solteq med {detail} og forskellige oplysninger. "
+        "Det er ikke muligt at afgøre hvilken klinik der er korrekt. "
+        "Kontakt Tandplejens administration, tandplejen@mbu.aarhus.dk."
     )
-    logger.error(
-        "Multiple clinics found in SolteqTand database for the given provider number or phone number."
+
+
+def _resolve_clinics(
+    clinics: list, check_fields: list, provider_number=None, phone_number=None
+) -> list:
+    """Return a single-element list if all multiple matches are duplicates of the same clinic.
+
+    Clinics are considered duplicates when all check_fields values are identical across
+    every result. The fields to check depend on how the search was performed:
+    - Both values provided: only streetAddress (search already ensured contractorId + phoneNumber match)
+    - Only provider number: streetAddress + phoneNumber (search only guaranteed contractorId)
+    - Only phone number: streetAddress + contractorId (search only guaranteed phoneNumber)
+    """
+    if _all_same_values(clinics, check_fields):
+        logger.info(
+            "Multiple clinics found but all share the same %s — treating as one clinic.",
+            " and ".join(check_fields),
+        )
+        return [clinics[0]]
+    _more_than_one_clinic_found_error(
+        provider_number=provider_number, phone_number=phone_number
     )
-    raise BusinessError(error_message)
 
 
 def _try_match_by_provider_and_phone(
     database: SolteqTandDatabase, provider_number, phone_number
 ):
-    """Try to match clinic by provider number and optionally phone number."""
+    """Match clinic by both provider number and phone number."""
     clinics_by_provider = database.get_list_of_clinics(
         filters={"contractorId": provider_number}
     )
-
     if not clinics_by_provider:
         return None
-
-    if phone_number:
-        matching_clinics = [
-            c for c in clinics_by_provider if c.get("phoneNumber") == phone_number
-        ]
-        if len(matching_clinics) > 1:
-            _more_than_one_clinic_found_error()
-        elif len(matching_clinics) == 1:
-            return matching_clinics
-    else:
-        if len(clinics_by_provider) > 1:
-            _more_than_one_clinic_found_error()
-        return clinics_by_provider
-
+    matching_clinics = [
+        c for c in clinics_by_provider if c.get("phoneNumber") == phone_number
+    ]
+    if len(matching_clinics) > 1:
+        return _resolve_clinics(
+            matching_clinics,
+            ["streetAddress"],
+            provider_number=provider_number,
+            phone_number=phone_number,
+        )
+    elif len(matching_clinics) == 1:
+        return matching_clinics
     return None
 
 
-def _try_match_by_phone(database, phone_number):
-    """Try to match clinic by phone number only."""
-    clinics_by_phone = database.get_list_of_clinics(
-        filters={"phoneNumber": phone_number}
-    )
+def _try_match_by_provider(database: SolteqTandDatabase, provider_number):
+    """Match clinic by provider number only."""
+    clinics = database.get_list_of_clinics(filters={"contractorId": provider_number})
+    if len(clinics) > 1:
+        return _resolve_clinics(
+            clinics, ["streetAddress", "phoneNumber"], provider_number=provider_number
+        )
+    elif len(clinics) == 1:
+        return clinics
+    return None
 
-    if len(clinics_by_phone) > 1:
-        _more_than_one_clinic_found_error()
-    elif len(clinics_by_phone) == 1:
-        return clinics_by_phone
 
+def _try_match_by_phone(database: SolteqTandDatabase, phone_number):
+    """Match clinic by phone number only."""
+    clinics = database.get_list_of_clinics(filters={"phoneNumber": phone_number})
+    if len(clinics) > 1:
+        return _resolve_clinics(
+            clinics, ["streetAddress", "contractorId"], phone_number=phone_number
+        )
+    elif len(clinics) == 1:
+        return clinics
     return None
 
 
 def match_clinic():
     """
-    Clinic matching with the following logic:
-    1. If provider number exists: match on provider number + phone number
-       - If multiple clinics found with same provider number AND phone number: return error
-       - If no match found: try phone number only
-    2. If no provider number (or no match in step 1): match on phone number only
-       - If multiple clinics found with same phone number: return error
-    3. If no match found in either case: return error
+    Clinic matching logic based on which values the user provided:
+    - Both provider number AND phone number: match on both fields combined.
+    - Only provider number: match by provider number; error if multiple clinics share it.
+    - Only phone number: match by phone number; error if multiple clinics share it.
+    - Neither provided: error.
+    No fallthrough between cases — each path is independent.
 
     Returns:
         dict: {
@@ -103,44 +142,95 @@ def match_clinic():
             os.environ.get("DBCONNECTIONSTRINGSOLTEQTAND", "")
         )
 
-        # Step 1: Try matching by provider number and phone number
-        if provider_number:
-            logger.info(
-                "Step 1: Provider number provided, searching with provider number + phone number."
-            )
+        if provider_number and phone_number:
+            logger.info("Searching by both provider number and phone number.")
             match_result = _try_match_by_provider_and_phone(
                 database, provider_number, phone_number
             )
-            if match_result:
-                result["success"] = True
-                result["clinic"] = match_result[0]
-                set_context_values(private_clinic_data=match_result)
-                logger.info("Match found by provider number")
-                return result
-
-        # Step 2: Try matching by phone number only
-        if phone_number and not result["success"]:
-            logger.info("Step 2: Searching by phone number only.")
+        elif provider_number:
+            logger.info("Searching by provider number only.")
+            match_result = _try_match_by_provider(database, provider_number)
+        elif phone_number:
+            logger.info("Searching by phone number only.")
             match_result = _try_match_by_phone(database, phone_number)
-            if match_result:
-                result["success"] = True
-                result["clinic"] = match_result[0]
-                set_context_values(private_clinic_data=match_result)
-                logger.info("Match found by phone number")
-                return result
+        else:
+            result["error"] = "Neither provider number nor phone number was provided."
+            logger.error(result["error"])
+            return result
 
-        # Step 3: No match found
-        if not result["success"]:
-            result["error"] = (
-                "No clinic found matching the provided provider number or phone number."
-            )
+        if match_result:
+            result["success"] = True
+            result["clinic"] = match_result[0]
+            set_context_values(private_clinic_data=match_result)
+            logger.info("Clinic match found.")
+        else:
+            if provider_number and phone_number:
+                result["error"] = (
+                    f"Ingen klinik fundet i Solteq med ydernummer '{provider_number}' "
+                    f"og telefonnummer '{phone_number}'."
+                )
+            elif provider_number:
+                result["error"] = (
+                    f"Ingen klinik fundet i Solteq med ydernummer '{provider_number}'."
+                )
+            else:
+                result["error"] = (
+                    f"Ingen klinik fundet i Solteq med telefonnummer '{phone_number}'."
+                )
             logger.error(result["error"])
 
+    except BusinessError:
+        raise
     except Exception as e:
         logger.error("Error occurred during clinic matching: %s", e)
         result["error"] = f"An error occurred: {str(e)}"
 
     return result
+
+
+def _check_clinic_in_edi_portal(solteq_app, matched_clinic: dict) -> None:
+    """Open EDI portal and verify the matched clinic's contractor ID and phone number.
+
+    Raises:
+        BusinessError: If the clinic is not found or its phone number doesn't match.
+    """
+    solteq_app.open_edi_portal()
+    try:
+        contractor_id = matched_clinic.get("contractorId", "")
+        phone_number = matched_clinic.get("phoneNumber", "")
+
+        extern_clinic_data = [
+            {"contractorId": contractor_id, "phoneNumber": phone_number}
+        ]
+        result = solteq_app.edi_portal_check_contractor_id(extern_clinic_data)
+
+        if result is None:
+            raise RuntimeError("EDI portal contractor check returned None.")
+
+        user_provider_number = get_context_values("clinic_provider_number")
+        user_phone_number = get_context_values("clinic_phone_number")
+        user_info = f"Bruger oplyste: ydernummer='{user_provider_number}', telefonnummer='{user_phone_number}'"
+
+        if result["rowCount"] == 0:
+            logger.warning("Matched clinic not found in EDI portal.")
+            raise BusinessError(
+                f"Fandt ikke ydernummer '{contractor_id}' i EDI Portalen. "
+                f"{user_info}. "
+                "Kontakt Tandplejens administration, tandplejen@mbu.aarhus.dk."
+            )
+
+        if not result["isPhoneNumberMatch"]:
+            logger.warning("Matched clinic phone number does not match EDI portal.")
+            raise BusinessError(
+                f"Telefonnummer '{phone_number}' fra Solteq matchede ikke telefonnummeret i EDI Portalen "
+                f"for ydernummer '{contractor_id}'. "
+                f"{user_info}. "
+                "Kontakt Tandplejens administration, tandplejen@mbu.aarhus.dk."
+            )
+
+        logger.info("Matched clinic verified in EDI portal.")
+    finally:
+        solteq_app.close_edi_portal()
 
 
 def validate_contractor():
@@ -155,17 +245,16 @@ def validate_contractor():
         match_result = match_clinic()
 
         if not match_result["success"]:
-            contractor_lookup_error = {
-                "type": "BusinessError",
-                "message": """Kontakt Tandplejens administration, tandplejen@mbu.aarhus.dk, og bed om at få undersøgt, om tandklinikken er oprettet i Solteq eller om den mangler oplysninger om ydernummer eller telefonnummer, der matcher det i EDI.
-                Afvent svar.
-                Du kan genstarte processen, når klinikken er oprettet eller dens oplysninger er rettet i Solteq. """,
-            }
             logger.error(
                 "Contractor not found in SolteqTand database. Error: %s",
                 match_result["error"],
             )
-            raise BusinessError(contractor_lookup_error["message"])
+            raise BusinessError(
+                f"{match_result['error']}\n"
+                "Kontakt Tandplejens administration, tandplejen@mbu.aarhus.dk, og bed om at få undersøgt "
+                "om tandklinikken er oprettet i Solteq eller om den mangler korrekte oplysninger.\n"
+                "Du kan genstarte processen, når klinikken er oprettet eller dens oplysninger er rettet i Solteq."
+            )
 
         # Get matched clinic data
         matched_clinic = match_result["clinic"]
@@ -176,7 +265,12 @@ def validate_contractor():
         if solteq_app is None:
             raise ValueError("Could not get application instance.")
 
-        solteq_db_conn = get_rpa_constant("srvapptmtsql03_connection_string")
+        # Verify the matched clinic exists in the EDI portal and its phone number matches
+        _check_clinic_in_edi_portal(solteq_app, matched_clinic)
+
+        # solteq_db_conn = get_rpa_constant("srvapptmtsql03_connection_string")
+        solteq_db_conn = str(os.getenv("SOLTEQ_TAND_DB_CONNSTR"))
+
         solteq_db_obj = SolteqTandDatabase(conn_str=solteq_db_conn)
         filters = {
             "p.cpr": get_context_values("cpr"),

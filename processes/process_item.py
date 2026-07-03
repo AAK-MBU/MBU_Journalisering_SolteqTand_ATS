@@ -10,6 +10,7 @@ from processes.application_handler import close, get_app
 from processes.shared.handlers.dashboard_data_handler import handle_process_dashboard
 from processes.shared.utils.clean_up import clean_up
 from processes.sub_processes.fritvalg.process import process_fritvalg
+from processes.sub_processes.retur.process import process_retur
 from processes.sub_processes.tilflytter.process import process_tilflytter
 from processes.sub_processes.udskrivning_22_aar.process import (
     process_udskrivning_22_aar,
@@ -42,6 +43,12 @@ def process_item(item_data: dict, item_reference: str, item_id: str, subprocess:
             )
         elif subprocess == "fritvalg":
             process_fritvalg(
+                item_data=item_data,
+                item_reference=item_reference,
+                item_id=item_id,
+            )
+        elif subprocess == "retur":
+            process_retur(
                 item_data=item_data,
                 item_reference=item_reference,
                 item_id=item_id,

@@ -66,7 +66,7 @@ def process_udskrivning_22_aar(
         )
 
         # Set journalizing process status in RPA database
-        update_process_status("InProgress")
+        # update_process_status("InProgress")
 
         # Get the application instance and open patient in Solteq Tand application
         solteq_app = get_app()
@@ -123,12 +123,12 @@ def process_udskrivning_22_aar(
         consent_udskrivning22aar_handler()
 
         # Update journalizing process status in RPA database
-        update_process_status("Successful")
+        # update_process_status("Successful")
     except BusinessError as be:
         logger.error("Business error occurred: %s", be)
-        update_process_status("Failed")
+        # update_process_status("Failed")
         raise be
     except Exception as e:
         logger.error("Application error occurred: %s", e)
-        update_process_status("Failed")
+        # update_process_status("Failed")
         raise e

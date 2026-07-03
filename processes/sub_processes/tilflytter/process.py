@@ -80,12 +80,12 @@ def process_tilflytter(item_data: dict, item_reference: str, item_id: str):
         logger.info(
             "Handling updating journalizing database with status failed...",
         )
-        update_process_status("Failed")
+        # update_process_status("Failed")
         raise be
     except Exception as e:
         logger.error("Application error occurred: %s", e)
         logger.info(
             "Handling updating journalizing database with status failed...",
         )
-        update_process_status("Failed")
+        # update_process_status("Failed")
         raise e

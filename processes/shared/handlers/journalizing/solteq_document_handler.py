@@ -27,7 +27,10 @@ def journalize_document(document_type: str, document_file_name: str):
             raise ValueError("Could not get application instance.")
 
         solteq_db_conn = get_rpa_constant("srvapptmtsql03_connection_string")
-        full_path = get_context_values("os2forms_document_path")
+        # full_path = get_context_values("os2forms_document_path")
+        full_path = (
+            r"C:\Temp\Journalizing\Documents\Anmodning om kommunal tandpleje.pdf"
+        )
         item_reference = get_context_values("reference")
 
         # Create RPA database object
@@ -61,14 +64,14 @@ def journalize_document(document_type: str, document_file_name: str):
                 raise RuntimeError("Document journalizing failed.")
 
         # Update journalizing response metadata in RPA database
-        update_response_metadata(
-            step_name="Document", json_fragment={"DocumentCreated": True}
-        )
+        # update_response_metadata(
+        #     step_name="Document", json_fragment={"DocumentCreated": True}
+        # )
         logger.info("Document journalized successfully.")
     except Exception as e:
-        update_response_metadata(
-            step_name="Document", json_fragment={"DocumentCreated": False}
-        )
-        update_process_status("Failed")
+        # update_response_metadata(
+        #     step_name="Document", json_fragment={"DocumentCreated": False}
+        # )
+        # update_process_status("Failed")
         logger.error("Error journalizing document: %s", e)
         raise RuntimeError("Error journalizing document: " + str(e)) from e

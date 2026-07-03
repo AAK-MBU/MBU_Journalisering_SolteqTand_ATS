@@ -11,7 +11,7 @@ def process_journalization_step(
     document_file_name: str,
 ) -> None:
     """Journalize form document in Solteq."""
-    get_os2forms_document()
+    # get_os2forms_document()
 
     journalize_document(
         document_type=document_type,

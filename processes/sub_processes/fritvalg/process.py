@@ -53,7 +53,7 @@ def process_fritvalg(
         )
 
         # Set journalizing process status in RPA database
-        update_process_status("InProgress")
+        # update_process_status("InProgress")
 
         # Get the application instance and open patient in Solteq Tand application
         solteq_app = get_app()
@@ -143,7 +143,7 @@ def process_fritvalg(
         create_event(event_message=config.EVENT_MESSAGE, clinic_name=config.CLINIC_NAME)
 
         # Update journalizing process status in RPA database
-        update_process_status("Successful")
+        # update_process_status("Successful")
 
     except Exception as e:
         logger.error("Error processing 'Fritvalg' item: %s", e)

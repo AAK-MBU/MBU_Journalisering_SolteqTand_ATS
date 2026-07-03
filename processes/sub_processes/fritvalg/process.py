@@ -2,11 +2,16 @@
 
 import logging
 
-from helpers.context_functions import get_context_values, set_context_values
+from helpers.context_functions import (
+    get_context,
+    get_context_values,
+    set_context_values,
+)
 from processes.application_handler import get_app
 from processes.shared.handlers.dashboard_data_handler import handle_process_dashboard
 from processes.shared.handlers.event_handler import create_event
-from processes.shared.handlers.journalizing.db_handler import update_process_status
+
+# from processes.shared.handlers.journalizing.db_handler import update_process_status
 from processes.shared.handlers.journalizing.process_journalizing import (
     process_journalization_step,
 )
@@ -49,7 +54,7 @@ def process_fritvalg(
         )
 
         # Set journalizing process status in RPA database
-        update_process_status("InProgress")
+        # update_process_status("InProgress")
 
         # Get the application instance and open patient in Solteq Tand application
         solteq_app = get_app()
@@ -95,6 +100,9 @@ def process_fritvalg(
             config.DASHBOARD_STEP_3_NAME,
         )
 
+        # just before raise SystemError(...)
+        logger.info("Current context vars: %s", get_context())
+
         validate_contractor()
 
         # Step 4
@@ -136,7 +144,7 @@ def process_fritvalg(
         create_event(event_message=config.EVENT_MESSAGE, clinic_name=config.CLINIC_NAME)
 
         # Update journalizing process status in RPA database
-        update_process_status("Successful")
+        # update_process_status("Successful")
 
     except Exception as e:
         logger.error("Error processing 'Fritvalg' item: %s", e)

@@ -7,7 +7,8 @@ from mbu_rpa_core.exceptions import BusinessError
 from helpers.context_functions import get_context_values, set_context_values
 from processes.application_handler import get_app
 from processes.shared.handlers.dashboard_data_handler import handle_process_dashboard
-from processes.shared.handlers.journalizing.db_handler import update_process_status
+
+# from processes.shared.handlers.journalizing.db_handler import update_process_status
 from processes.shared.handlers.journalizing.process_journalizing import (
     process_journalization_step,
 )
@@ -80,12 +81,12 @@ def process_tilflytter(item_data: dict, item_reference: str, item_id: str):
         logger.info(
             "Handling updating journalizing database with status failed...",
         )
-        update_process_status("Failed")
+        # update_process_status("Failed")
         raise be
     except Exception as e:
         logger.error("Application error occurred: %s", e)
         logger.info(
             "Handling updating journalizing database with status failed...",
         )
-        update_process_status("Failed")
+        # update_process_status("Failed")
         raise e

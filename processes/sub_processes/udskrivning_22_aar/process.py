@@ -10,7 +10,8 @@ from processes.shared.handlers.dashboard_data_handler import (
     handle_process_dashboard,
     update_process_run_metadata,
 )
-from processes.shared.handlers.journalizing.db_handler import update_process_status
+
+# from processes.shared.handlers.journalizing.db_handler import update_process_status
 from processes.shared.handlers.journalizing.process_journalizing import (
     process_journalization_step,
 )

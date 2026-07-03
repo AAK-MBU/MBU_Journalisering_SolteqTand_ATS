@@ -8,10 +8,11 @@ from mbu_dev_shared_components.solteqtand.database import SolteqTandDatabase
 from helpers.context_functions import get_context_values
 from helpers.credential_constants import get_rpa_constant
 from processes.application_handler import get_app
-from processes.shared.handlers.journalizing.db_handler import (
-    update_process_status,
-    update_response_metadata,
-)
+
+# from processes.shared.handlers.journalizing.db_handler import (
+#     update_process_status,
+#     update_response_metadata,
+# )
 
 logger = logging.getLogger(__name__)
 
@@ -27,10 +28,8 @@ def journalize_document(document_type: str, document_file_name: str):
             raise ValueError("Could not get application instance.")
 
         solteq_db_conn = get_rpa_constant("srvapptmtsql03_connection_string")
-        # full_path = get_context_values("os2forms_document_path")
-        full_path = (
-            r"C:\Temp\Journalizing\Documents\Anmodning om kommunal tandpleje.pdf"
-        )
+        full_path = get_context_values("os2forms_document_path")
+
         item_reference = get_context_values("reference")
 
         # Create RPA database object

@@ -13,7 +13,7 @@ from processes.sub_processes.retur.handler import (
     create_receipt_journal_note,
     get_clinic_name,
 )
-from processes.sub_processes.tilflytter.set_context import set_context_vars
+from processes.sub_processes.retur.set_context import set_context_vars
 
 from . import config
 

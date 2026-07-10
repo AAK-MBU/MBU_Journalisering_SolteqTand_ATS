@@ -52,8 +52,23 @@ def get_workqueue_items(workqueue: Workqueue, return_data=False):
 
 
 def get_item_info(item: WorkItem):
-    """Unpack item"""
-    return item.data["item"]["data"], item.data["item"]["reference"], item.id
+    """Unpack a work item from either producer.
+
+    Legacy producer wraps as {"item": {"data": ..., "reference": ...}};
+    the polling service stores the payload flat with the reference on the
+    work item itself. Peel any wrapper(s), then fall back to flat.
+    """
+    payload = item.data
+    reference = item.reference
+    while (
+        isinstance(payload, dict)
+        and isinstance(payload.get("item"), dict)
+        and "data" in payload["item"]
+    ):
+        wrapper = payload["item"]
+        reference = wrapper.get("reference", reference)
+        payload = wrapper["data"]
+    return payload, reference, item.id
 
 
 def init_logger():

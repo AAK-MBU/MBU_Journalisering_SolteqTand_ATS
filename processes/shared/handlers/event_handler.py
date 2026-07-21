@@ -65,7 +65,9 @@ def create_event(event_message: str, clinic_name: str) -> None:
 
     logger.info("Checking if event '%s' exists for patient.", event_message)
 
-    if _get_events(event_message=event_message):
+    result = _get_events(event_message=event_message)
+    logger.info("check exists -> %r (event_message=%r)", result, event_message)
+    if result:
         logger.info("Event already exists.")
         return
 

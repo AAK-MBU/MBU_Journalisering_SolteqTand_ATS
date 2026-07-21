@@ -36,7 +36,7 @@ python main.py --subprocess <subprocess> [--queue] [--process] [--finalize]
 
 | Argument | Choices | Description |
 |---|---|---|
-| `--subprocess` | `tilflytter`, `udskrivning22ar`, `fritvalg` | Selects which sub-process logic to execute |
+| `--subprocess` | `tilflytter`, `udskrivning22ar`, `fritvalg`, `retur` | Selects which sub-process logic to execute |
 
 **Examples:**
 

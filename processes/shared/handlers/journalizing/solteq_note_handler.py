@@ -8,10 +8,11 @@ from mbu_dev_shared_components.solteqtand.database import SolteqTandDatabase
 from helpers.context_functions import get_context_values
 from helpers.credential_constants import get_rpa_constant
 from processes.application_handler import get_app
-from processes.shared.handlers.journalizing.db_handler import (
-    update_process_status,
-    update_response_metadata,
-)
+
+# from processes.shared.handlers.journalizing.db_handler import (
+#     update_process_status,
+#     update_response_metadata,
+# )
 
 logger = logging.getLogger(__name__)
 
@@ -65,15 +66,15 @@ def create_journalnote(
             logger.info("Journal note already exists. Skipping creation.")
 
         # Update journal note response metadata in RPA database
-        update_response_metadata(
-            step_name="JournalNote", json_fragment={"JournalNoteCreated": True}
-        )
+        # update_response_metadata(
+        #     step_name="JournalNote", json_fragment={"JournalNoteCreated": True}
+        # )
         logger.info("Journal note creation process completed successfully.")
     except Exception as e:
-        update_response_metadata(
-            step_name="JournalNote", json_fragment={"JournalNoteCreated": False}
-        )
-        update_process_status("Failed")
+        # update_response_metadata(
+        #     step_name="JournalNote", json_fragment={"JournalNoteCreated": False}
+        # )
+        # update_process_status("Failed")
         logger.error("Error creating journal note: %s", e)
         raise RuntimeError("Error creating journal note: " + str(e)) from e
 
@@ -127,14 +128,14 @@ def create_sub_note(
                 raise RuntimeError("Journal note creation failed.")
 
         # Update journal note response metadata in RPA database
-        update_response_metadata(
-            step_name="JournalSubNote", json_fragment={"JournalSubNoteCreated": True}
-        )
+        # update_response_metadata(
+        #     step_name="JournalSubNote", json_fragment={"JournalSubNoteCreated": True}
+        # )
         logger.info("Journal sub note creation process completed successfully.")
     except Exception as e:
-        update_response_metadata(
-            step_name="JournalSubNote", json_fragment={"JournalSubNoteCreated": False}
-        )
-        update_process_status("Failed")
+        # update_response_metadata(
+        #     step_name="JournalSubNote", json_fragment={"JournalSubNoteCreated": False}
+        # )
+        # update_process_status("Failed")
         logger.error("Error creating journal sub note: %s", e)
         raise RuntimeError("Error creating journal sub note: " + str(e)) from e

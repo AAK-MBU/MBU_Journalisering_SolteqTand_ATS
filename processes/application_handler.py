@@ -48,9 +48,7 @@ def open_patient(cpr: str) -> SolteqTandApp:
     try:
         solteq_app.open_patient(cpr)
     except PatientNotFoundError as exc:
-        raise BusinessError(
-            f"Patient med CPR {cpr} findes ikke i Solteq Tand"
-        ) from exc
+        raise BusinessError(f"Patient med CPR {cpr} findes ikke i Solteq Tand") from exc
     except NotMatchingError as exc:
         raise BusinessError(
             f"Opened patient's CPR did not match the requested CPR: {cpr}"

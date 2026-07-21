@@ -43,7 +43,11 @@ def _more_than_one_clinic_found_error(provider_number=None, phone_number=None):
             "Kontakt Tandplejens administration tandplejen@mbu.aarhus.dk og bed om at få rettet til så kun en tandklinik har telefonnummeret.\n\n"
             f"{_RESTART_TEXT}"
         )
-    logger.error("Multiple clinics found in SolteqTand database: provider=%s, phone=%s.", provider_number, phone_number)
+    logger.error(
+        "Multiple clinics found in SolteqTand database: provider=%s, phone=%s.",
+        provider_number,
+        phone_number,
+    )
     raise BusinessError(message)
 
 
@@ -206,7 +210,9 @@ def match_clinic():
     return result
 
 
-def _check_clinic_in_edi_portal(solteq_app: SolteqTandApp, matched_clinic: dict) -> None:
+def _check_clinic_in_edi_portal(
+    solteq_app: SolteqTandApp, matched_clinic: dict
+) -> None:
     """Open EDI portal and verify the matched clinic's contractor ID and phone number.
 
     Raises:

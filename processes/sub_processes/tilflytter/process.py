@@ -5,7 +5,7 @@ import logging
 from mbu_rpa_core.exceptions import BusinessError
 
 from helpers.context_functions import get_context_values, set_context_values
-from processes.application_handler import get_app
+from processes.application_handler import open_patient
 from processes.shared.handlers.dashboard_data_handler import handle_process_dashboard
 
 # from processes.shared.handlers.journalizing.db_handler import update_process_status
@@ -51,13 +51,8 @@ def process_tilflytter(item_data: dict, item_reference: str, item_id: str):
             process_step_name=get_context_values("current_step_name"),
         )
 
-        # Get the application instance
-        solteq_app = get_app()
-        if solteq_app is None:
-            raise ValueError("Could not get application instance.")
-
-        logger.info("Opening patient in Solteq Tand application...")
-        solteq_app.open_patient(get_context_values("cpr"))
+        # Open patient in Solteq Tand application
+        solteq_app = open_patient(get_context_values("cpr"))
 
         # Journalize form document in Solteq
         process_journalization_step(

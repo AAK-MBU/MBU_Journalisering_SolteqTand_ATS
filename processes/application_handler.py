@@ -4,12 +4,12 @@ import logging
 import subprocess as sp
 from subprocess import CalledProcessError
 
-from mbu_dev_shared_components.solteqtand.application import SolteqTandApp
-from mbu_dev_shared_components.solteqtand.application.exceptions import (
+from mbu_rpa_core.exceptions import BusinessError
+from mbu_solteqtand_shared_components.application import SolteqTandApp
+from mbu_solteqtand_shared_components.application.exceptions import (
     NotMatchingError,
     PatientNotFoundError,
 )
-from mbu_rpa_core.exceptions import BusinessError
 
 from helpers import config
 from helpers.credential_constants import get_rpa_credentials

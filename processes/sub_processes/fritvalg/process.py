@@ -10,8 +10,7 @@ from helpers.context_functions import (
 from processes.application_handler import open_patient
 from processes.shared.handlers.dashboard_data_handler import handle_process_dashboard
 from processes.shared.handlers.event_handler import create_event
-
-# from processes.shared.handlers.journalizing.db_handler import update_process_status
+from processes.shared.handlers.journalizing.db_handler import update_process_status
 from processes.shared.handlers.journalizing.process_journalizing import (
     process_journalization_step,
 )
@@ -139,8 +138,9 @@ def process_fritvalg(
         create_event(event_message=config.EVENT_MESSAGE, clinic_name=config.CLINIC_NAME)
 
         # Update journalizing process status in RPA database
-        # update_process_status("Successful")
+        update_process_status("Successful")
 
     except Exception as e:
         logger.error("Error processing 'Fritvalg' item: %s", e)
+        update_process_status("Failed")
         raise

@@ -8,11 +8,10 @@ from mbu_dev_shared_components.solteqtand.database import SolteqTandDatabase
 from helpers.context_functions import get_context_values
 from helpers.credential_constants import get_rpa_constant
 from processes.application_handler import get_app
-
-# from processes.shared.handlers.journalizing.db_handler import (
-#     update_process_status,
-#     update_response_metadata,
-# )
+from processes.shared.handlers.journalizing.db_handler import (
+    update_process_status,
+    update_response_metadata,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -63,14 +62,14 @@ def journalize_document(document_type: str, document_file_name: str):
                 raise RuntimeError("Document journalizing failed.")
 
         # Update journalizing response metadata in RPA database
-        # update_response_metadata(
-        #     step_name="Document", json_fragment={"DocumentCreated": True}
-        # )
+        update_response_metadata(
+            step_name="Document", json_fragment={"DocumentCreated": True}
+        )
         logger.info("Document journalized successfully.")
     except Exception as e:
-        # update_response_metadata(
-        #     step_name="Document", json_fragment={"DocumentCreated": False}
-        # )
-        # update_process_status("Failed")
+        update_response_metadata(
+            step_name="Document", json_fragment={"DocumentCreated": False}
+        )
+        update_process_status("Failed")
         logger.error("Error journalizing document: %s", e)
         raise RuntimeError("Error journalizing document: " + str(e)) from e

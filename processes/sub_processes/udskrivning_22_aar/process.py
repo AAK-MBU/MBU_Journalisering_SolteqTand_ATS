@@ -10,8 +10,7 @@ from processes.shared.handlers.dashboard_data_handler import (
     handle_process_dashboard,
     update_process_run_metadata,
 )
-
-# from processes.shared.handlers.journalizing.db_handler import update_process_status
+from processes.shared.handlers.journalizing.db_handler import update_process_status
 from processes.shared.handlers.journalizing.process_journalizing import (
     process_journalization_step,
 )
@@ -67,7 +66,7 @@ def process_udskrivning_22_aar(
         )
 
         # Set journalizing process status in RPA database
-        # update_process_status("InProgress")
+        update_process_status("InProgress")
 
         # Open patient in Solteq Tand application
         open_patient(get_context_values("cpr"))
@@ -119,12 +118,12 @@ def process_udskrivning_22_aar(
         consent_udskrivning22aar_handler()
 
         # Update journalizing process status in RPA database
-        # update_process_status("Successful")
+        update_process_status("Successful")
     except BusinessError as be:
         logger.error("Business error occurred: %s", be)
-        # update_process_status("Failed")
+        update_process_status("Failed")
         raise be
     except Exception as e:
         logger.error("Application error occurred: %s", e)
-        # update_process_status("Failed")
+        update_process_status("Failed")
         raise e

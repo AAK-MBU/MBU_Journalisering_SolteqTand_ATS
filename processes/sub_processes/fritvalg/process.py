@@ -7,7 +7,7 @@ from helpers.context_functions import (
     get_context_values,
     set_context_values,
 )
-from processes.application_handler import get_app
+from processes.application_handler import open_patient
 from processes.shared.handlers.dashboard_data_handler import handle_process_dashboard
 from processes.shared.handlers.event_handler import create_event
 from processes.shared.handlers.journalizing.db_handler import update_process_status
@@ -43,8 +43,6 @@ def process_fritvalg(
             item_id,
         )
 
-        release_keys()
-
         # Set context variables for further processing
         set_context_vars(
             item_data=item_data,
@@ -52,20 +50,17 @@ def process_fritvalg(
             item_id=item_id,
         )
 
-        # Set journalizing process status in RPA database
-        update_process_status("InProgress")
-
-        # Get the application instance and open patient in Solteq Tand application
-        solteq_app = get_app()
-        if solteq_app is None:
-            raise ValueError("Could not get application instance.")
-
-        logger.info("Opening patient in Solteq Tand application...")
-        solteq_app.open_patient(get_context_values("cpr"))
-
         # Step 2
         # Journalize form document in Solteq
         set_context_values(current_step_name=config.DASHBOARD_STEP_2_NAME)
+
+        release_keys()
+
+        # Set journalizing process status in RPA database
+        update_process_status("InProgress")
+
+        # Open patient in Solteq Tand application
+        open_patient(get_context_values("cpr"))
 
         logger.info(
             "Handling step 2: %s ...",

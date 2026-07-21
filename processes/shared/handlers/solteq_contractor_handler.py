@@ -2,6 +2,7 @@
 
 import logging
 
+from mbu_dev_shared_components.solteqtand.application import SolteqTandApp
 from mbu_dev_shared_components.solteqtand.database import SolteqTandDatabase
 from mbu_rpa_core.exceptions import BusinessError
 
@@ -19,20 +20,31 @@ def _all_same_values(clinics: list, fields: list) -> bool:
     return len(value_sets) == 1
 
 
+_RESTART_TEXT = "Du kan genstarte processen, når klinikken er oprettet eller dens oplysninger er rettet i Solteq."
+
+
 def _more_than_one_clinic_found_error(provider_number=None, phone_number=None):
     """Raise BusinessError when multiple clinics match the given search values."""
     if provider_number and phone_number:
-        detail = f"ydernummer '{provider_number}' og telefonnummer '{phone_number}'"
+        message = (
+            f"Der er fundet flere klinikker i Solteq med ydernummeret '{provider_number}' og telefonnummeret '{phone_number}'.\n"
+            "Kontakt Tandplejens administration tandplejen@mbu.aarhus.dk og bed om at få undersøgt hvilken klinik der er korrekt.\n\n"
+            f"{_RESTART_TEXT}"
+        )
     elif provider_number:
-        detail = f"ydernummer '{provider_number}'"
+        message = (
+            f"Der er fundet flere klinikker i Solteq med ydernummeret '{provider_number}'.\n"
+            "Kontakt Tandplejens administration tandplejen@mbu.aarhus.dk og bed om at få rettet til så kun en tandklinik har ydernummeret.\n\n"
+            f"{_RESTART_TEXT}"
+        )
     else:
-        detail = f"telefonnummer '{phone_number}'"
-    logger.error("Multiple clinics found in SolteqTand database for %s.", detail)
-    raise BusinessError(
-        f"Fandt flere klinikker i Solteq med {detail} og forskellige oplysninger. "
-        "Det er ikke muligt at afgøre hvilken klinik der er korrekt. "
-        "Kontakt Tandplejens administration, tandplejen@mbu.aarhus.dk."
-    )
+        message = (
+            f"Der er fundet flere klinikker i Solteq med telefonnummeret '{phone_number}'.\n"
+            "Kontakt Tandplejens administration tandplejen@mbu.aarhus.dk og bed om at få rettet til så kun en tandklinik har telefonnummeret.\n\n"
+            f"{_RESTART_TEXT}"
+        )
+    logger.error("Multiple clinics found in SolteqTand database: provider=%s, phone=%s.", provider_number, phone_number)
+    raise BusinessError(message)
 
 
 def _resolve_clinics(
@@ -164,16 +176,24 @@ def match_clinic():
         else:
             if provider_number and phone_number:
                 result["error"] = (
-                    f"Ingen klinik fundet i Solteq med ydernummer '{provider_number}' "
-                    f"og telefonnummer '{phone_number}'."
+                    f"Ingen klinik fundet i Solteq med ydernummer '{provider_number}' og telefonnummer '{phone_number}'.\n"
+                    "Kontakt Tandplejens administration tandplejen@mbu.aarhus.dk og bed om at få undersøgt, "
+                    "om tandklinikken er oprettet i Solteq eller om den mangler korrekte oplysninger.\n\n"
+                    f"{_RESTART_TEXT}"
                 )
             elif provider_number:
                 result["error"] = (
-                    f"Ingen klinik fundet i Solteq med ydernummer '{provider_number}'."
+                    f"Ingen klinik fundet i Solteq med ydernummer '{provider_number}'.\n"
+                    "Kontakt Tandplejens administration tandplejen@mbu.aarhus.dk og bed om at få undersøgt, "
+                    "om tandklinikken er oprettet i Solteq eller om den mangler det rette ydernummer.\n\n"
+                    f"{_RESTART_TEXT}"
                 )
             else:
                 result["error"] = (
-                    f"Ingen klinik fundet i Solteq med telefonnummer '{phone_number}'."
+                    f"Ingen klinik fundet i Solteq med telefonnummer '{phone_number}'.\n"
+                    "Kontakt Tandplejens administration tandplejen@mbu.aarhus.dk og bed om at få undersøgt, "
+                    "om tandklinikken er oprettet i Solteq og om den har samme telefonnummer som oplyst i EDI-portalen.\n\n"
+                    f"{_RESTART_TEXT}"
                 )
             logger.error(result["error"])
 
@@ -186,7 +206,7 @@ def match_clinic():
     return result
 
 
-def _check_clinic_in_edi_portal(solteq_app, matched_clinic: dict) -> None:
+def _check_clinic_in_edi_portal(solteq_app: SolteqTandApp, matched_clinic: dict) -> None:
     """Open EDI portal and verify the matched clinic's contractor ID and phone number.
 
     Raises:
@@ -219,10 +239,11 @@ def _check_clinic_in_edi_portal(solteq_app, matched_clinic: dict) -> None:
 
         if not result["isPhoneNumberMatch"]:
             logger.warning("Matched clinic phone number does not match EDI portal.")
+            edi_phone_numbers = ", ".join(result.get("ediPhoneNumbers", []))
             raise BusinessError(
-                f"Telefonnummer '{phone_number}' fra Solteq matchede ikke telefonnummeret i EDI Portalen "
-                f"for ydernummer '{contractor_id}'. "
-                f"{user_info}. "
+                f"Valgt klinik med ydernummer '{contractor_id}' står i Solteq med "
+                f"telefonnummer '{phone_number}', hvilket ikke matcher telefonnummer "
+                f"i EDI Portalen som er '{edi_phone_numbers}'. "
                 "Kontakt Tandplejens administration, tandplejen@mbu.aarhus.dk."
             )
 
@@ -247,12 +268,7 @@ def validate_contractor():
                 "Contractor not found in SolteqTand database. Error: %s",
                 match_result["error"],
             )
-            raise BusinessError(
-                f"{match_result['error']}\n"
-                "Kontakt Tandplejens administration, tandplejen@mbu.aarhus.dk, og bed om at få undersøgt "
-                "om tandklinikken er oprettet i Solteq eller om den mangler korrekte oplysninger.\n"
-                "Du kan genstarte processen, når klinikken er oprettet eller dens oplysninger er rettet i Solteq."
-            )
+            raise BusinessError(match_result["error"])
 
         # Get matched clinic data
         matched_clinic = match_result["clinic"]

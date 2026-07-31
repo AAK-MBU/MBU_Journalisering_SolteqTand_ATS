@@ -38,4 +38,5 @@ EVENT_TEXT = "Tilflytter - Digital formular modtaget"
 # Dashboard settings
 # ----------------------
 DASHBOARD_PROCESS_NAME = "Tilflytter til Aarhus Kommune"
-DASHBOARD_STEP_6_NAME = "Formular journaliseret"
+DASHBOARD_STEP_6_NAME = "Formular indsendt inden for tidsfristen"
+DASHBOARD_STEP_7_NAME = "Formular journaliseret"

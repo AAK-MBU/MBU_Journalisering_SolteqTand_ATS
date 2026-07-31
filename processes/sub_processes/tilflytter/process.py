@@ -46,6 +46,18 @@ def process_tilflytter(item_data: dict, item_reference: str, item_id: str):
         )
 
         handle_process_dashboard(
+            status="success",
+            process_step_name=get_context_values("current_step_name"),
+        )
+
+        set_context_values(current_step_name=config.DASHBOARD_STEP_7_NAME)
+
+        logger.info(
+            "Handling step 7: %s ...",
+            config.DASHBOARD_STEP_7_NAME,
+        )
+
+        handle_process_dashboard(
             status="running",
             process_step_name=get_context_values("current_step_name"),
         )

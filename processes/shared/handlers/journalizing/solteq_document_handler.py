@@ -12,6 +12,7 @@ from processes.shared.handlers.journalizing.db_handler import (
     update_process_status,
     update_response_metadata,
 )
+from processes.shared.handlers.os2forms_handler import get_os2forms_document
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +28,6 @@ def journalize_document(document_type: str, document_file_name: str):
             raise ValueError("Could not get application instance.")
 
         solteq_db_conn = get_rpa_constant("srvapptmtsql03_connection_string")
-        full_path = get_context_values("os2forms_document_path")
 
         item_reference = get_context_values("reference")
 
@@ -46,6 +46,12 @@ def journalize_document(document_type: str, document_file_name: str):
         document_exists = solteq_db_obj.get_list_of_documents(filters=filters)
 
         if not document_exists:
+            # Only download the OS2 Forms document when it hasn't been
+            # journalized yet. On a rerun where the document already exists,
+            # we skip the download entirely.
+            get_os2forms_document()
+            full_path = get_context_values("os2forms_document_path")
+
             solteq_app.create_document(
                 document_full_path=full_path,
                 document_type=document_type,

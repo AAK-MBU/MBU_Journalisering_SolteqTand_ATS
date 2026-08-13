@@ -15,6 +15,45 @@ from processes.shared.handlers.journalizing.db_handler import (
 
 logger = logging.getLogger(__name__)
 
+NOTE_VERIFY_TIMEOUT_SECONDS = 30
+NOTE_VERIFY_POLL_INTERVAL_SECONDS = 2
+
+
+def _wait_for_journal_note(
+    solteq_db_obj: SolteqTandDatabase,
+    filters: dict,
+    timeout: int = NOTE_VERIFY_TIMEOUT_SECONDS,
+    poll_interval: int = NOTE_VERIFY_POLL_INTERVAL_SECONDS,
+) -> list:
+    """Poll the database until the journal note appears, or raise on timeout.
+
+    Returns the matching rows. Raises RuntimeError if the note has not
+    appeared within `timeout` seconds.
+    """
+    started = time.monotonic()
+    deadline = started + timeout
+    attempt = 0
+
+    while True:
+        attempt += 1
+        rows = solteq_db_obj.get_list_of_journal_notes(filters=filters)
+        if rows:
+            elapsed = time.monotonic() - started
+            logger.info(
+                "Journal note verified in database after %.1fs (%d lookup(s)).",
+                elapsed,
+                attempt,
+            )
+            return rows
+
+        if time.monotonic() >= deadline:
+            raise RuntimeError(
+                f"Journal note not found in database after {timeout}s "
+                f"({attempt} lookup(s)). filters={filters!r}"
+            )
+
+        time.sleep(poll_interval)
+
 
 def create_journalnote(
     journal_note_message: str,
@@ -53,14 +92,7 @@ def create_journalnote(
                 checkmark_in_complete=checkmark_in_complete,
             )
 
-            time.sleep(3)  # Wait for the journal note to be created
-
-            check_journal_note_created = solteq_db_obj.get_list_of_journal_notes(
-                filters=filters
-            )
-
-            if not check_journal_note_created:
-                raise RuntimeError("Journal note creation failed.")
+            _wait_for_journal_note(solteq_db_obj=solteq_db_obj, filters=filters)
         else:
             logger.info("Journal note already exists. Skipping creation.")
 
@@ -119,12 +151,7 @@ def create_sub_note(
 
             time.sleep(3)  # Wait for the journal note to be created
 
-            check_journal_note_created = solteq_db_obj.get_list_of_journal_notes(
-                filters=filters
-            )
-
-            if not check_journal_note_created:
-                raise RuntimeError("Journal note creation failed.")
+            _wait_for_journal_note(solteq_db_obj=solteq_db_obj, filters=filters)
 
         # Update journal note response metadata in RPA database
         update_response_metadata(

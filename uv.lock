@@ -401,7 +401,7 @@ wheels = [
 
 [[package]]
 name = "mbu-dev-shared-components"
-version = "4.4.9"
+version = "4.4.11"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "cryptography" },
@@ -409,9 +409,9 @@ dependencies = [
     { name = "pyodbc" },
     { name = "python-dateutil" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/d9/3a/1a4e104abe8d5bc9d40f16e7358521acc36b7a5f8e4b67ee03766e4b3048/mbu_dev_shared_components-4.4.9.tar.gz", hash = "sha256:bcd50763ab0a0e7353dc56ef278cf79477773251e7b2ad5ecd0eda85da48ab4a", size = 51852, upload-time = "2026-06-12T12:42:37.598Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/7b/13/e8a8606b7122601495fb92a0a45843c4874c12a3f77b78bc385568b2b4f7/mbu_dev_shared_components-4.4.11.tar.gz", hash = "sha256:18d97fa11daf8e9becec4c438d82170ff0722f0f30f386d21b4d5cb30efeb7fb", size = 51956, upload-time = "2026-07-03T09:57:04.278Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/d8/97/cadd2ec315ab3e5fb7c813b2458414819a5f8baaac04bc094b81faf3d642/mbu_dev_shared_components-4.4.9-py3-none-any.whl", hash = "sha256:d5db4f3323037353041f42293dce8ea7b876c5cbb2588ac0f5ef182ef3bf2fb5", size = 68321, upload-time = "2026-06-12T12:42:36.328Z" },
+    { url = "https://files.pythonhosted.org/packages/1b/00/9ff4d309a227494d996e5f75b755af32f6583bc6d35eddfcc80655c3a10e/mbu_dev_shared_components-4.4.11-py3-none-any.whl", hash = "sha256:dec4af657f29670e2cc67f80e106ebe23c24f4b466ce62fea11b94f9e45d40b9", size = 68525, upload-time = "2026-07-03T09:57:02.981Z" },
 ]
 
 [package.optional-dependencies]
@@ -437,13 +437,14 @@ utils = [
 
 [[package]]
 name = "mbu-journalisering-solteqtand-ats"
-version = "0.4.1"
+version = "0.6.4"
 source = { virtual = "." }
 dependencies = [
     { name = "automation-server-client" },
     { name = "mbu-dev-shared-components", extra = ["os2forms", "romexis", "solteqtand", "utils"] },
     { name = "mbu-process-dashboard-shared-components" },
     { name = "mbu-rpa-core" },
+    { name = "mbu-solteqtand-shared-components" },
     { name = "pillow" },
     { name = "pyodbc" },
     { name = "pytest" },
@@ -462,6 +463,7 @@ requires-dist = [
     { name = "mbu-dev-shared-components", extras = ["solteqtand", "romexis", "utils", "os2forms"] },
     { name = "mbu-process-dashboard-shared-components", specifier = "==1.5.0" },
     { name = "mbu-rpa-core" },
+    { name = "mbu-solteqtand-shared-components", specifier = ">=3.0.0" },
     { name = "pillow" },
     { name = "pyodbc" },
     { name = "pytest" },
@@ -508,6 +510,21 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/00/d3/7680deddda01af4258d0cd0c3972c4d56dc1cb1ebb7a0501cb625b6fbfb1/mbu_rpa_core-0.2.5.tar.gz", hash = "sha256:5580e31ee0314d1de7b4b873bb8bbb03b0d82ce3548b6123a922c85a92d3d3d8", size = 13785, upload-time = "2026-04-22T10:06:15.512Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/28/d5/01ab2778af07c2a291a134e1e7ac7f8c5ddc0e8faf5bab9d0d94eb7250a5/mbu_rpa_core-0.2.5-py3-none-any.whl", hash = "sha256:1074542c97202e46384cb8ee7beda114338af65ad8c24ed42e92a4f175b27b9d", size = 15415, upload-time = "2026-04-22T10:06:14.168Z" },
+]
+
+[[package]]
+name = "mbu-solteqtand-shared-components"
+version = "3.0.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "cryptography" },
+    { name = "dotenv" },
+    { name = "pyodbc" },
+    { name = "python-dateutil" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/d3/60/79bd4af4634792ee8b19f740817402699617cc014f34b2e62a62ac2c2cd8/mbu_solteqtand_shared_components-3.0.0.tar.gz", hash = "sha256:9450628ab40a6f9392353e8da7766b392c68fe2f1dbbce7bed2292393cca0426", size = 23787, upload-time = "2026-06-24T16:09:37.661Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/14/23/7d1f26bf699447709214e6198f57ae74e00948f4f67cc8d9a02e71556081/mbu_solteqtand_shared_components-3.0.0-py3-none-any.whl", hash = "sha256:22a2d1620fe0380266784ecb4bed56388f9f508ceba33e6d2cfdc4bf98fd461d", size = 31437, upload-time = "2026-06-24T16:09:36.507Z" },
 ]
 
 [[package]]
@@ -1058,14 +1075,14 @@ asyncio = [
 
 [[package]]
 name = "tqdm"
-version = "4.68.2"
+version = "4.69.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "colorama", marker = "sys_platform == 'win32'" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/85/05/0d5260f1f1ca784f4a4a0def9cbe6affe587f5b4025328d446c3d67765f4/tqdm-4.68.2.tar.gz", hash = "sha256:89c230e8dbc67c7615c142487111222f878c77427ea09549960f62389e258add", size = 171923, upload-time = "2026-06-09T13:26:42.539Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/8c/69/40407dfc835517f058b603dbf37a6df094d8582b015a51eddc988febbcb7/tqdm-4.69.0.tar.gz", hash = "sha256:700c5e85dcd5f009dd6222588a29180a193a748247a5d855b4d67db93d79a53b", size = 792569, upload-time = "2026-07-17T18:09:06.2Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/eb/75/1a0392bcc21c44dcdf87b3cf2d137e7829be2c083a1e38d44efca3d57a16/tqdm-4.68.2-py3-none-any.whl", hash = "sha256:d4240441fb5353290b87d6a85968c9decc131a99b8c7faa28269d829de669ede", size = 78578, upload-time = "2026-06-09T13:26:40.731Z" },
+    { url = "https://files.pythonhosted.org/packages/fe/21/99a0cdaf54eb35e77623c41b5a2c9472ee4404bba687052791fe2aba6773/tqdm-4.69.0-py3-none-any.whl", hash = "sha256:9979978912be667a6ef21fd5d8abf54e324e63d82f7f43c360792ebc2bc4e622", size = 676680, upload-time = "2026-07-17T18:09:04.172Z" },
 ]
 
 [[package]]

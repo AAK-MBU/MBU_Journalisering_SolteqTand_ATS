@@ -6,7 +6,7 @@ import logging
 from zoneinfo import ZoneInfo
 
 from dateutil.relativedelta import relativedelta
-from mbu_dev_shared_components.solteqtand.database import SolteqTandDatabase
+from mbu_solteqtand_shared_components.database.db_handler import SolteqTandDatabase
 
 from helpers.context_functions import get_context_values
 from helpers.credential_constants import get_rpa_constant

@@ -2,9 +2,7 @@
 
 import logging
 
-from mbu_dev_shared_components.solteqtand.database.db_handler import (
-    SolteqTandDatabase,
-)
+from mbu_solteqtand_shared_components.database.db_handler import SolteqTandDatabase
 
 from helpers.credential_constants import get_rpa_constant
 from processes.shared.handlers.journalizing.solteq_note_handler import (

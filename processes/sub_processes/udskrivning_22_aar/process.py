@@ -5,13 +5,12 @@ import logging
 from mbu_rpa_core.exceptions import BusinessError
 
 from helpers.context_functions import get_context_values, set_context_values
-from processes.application_handler import get_app
+from processes.application_handler import open_patient
 from processes.shared.handlers.dashboard_data_handler import (
     handle_process_dashboard,
     update_process_run_metadata,
 )
-
-# from processes.shared.handlers.journalizing.db_handler import update_process_status
+from processes.shared.handlers.journalizing.db_handler import update_process_status
 from processes.shared.handlers.journalizing.process_journalizing import (
     process_journalization_step,
 )
@@ -67,15 +66,10 @@ def process_udskrivning_22_aar(
         )
 
         # Set journalizing process status in RPA database
-        # update_process_status("InProgress")
+        update_process_status("InProgress")
 
-        # Get the application instance and open patient in Solteq Tand application
-        solteq_app = get_app()
-        if solteq_app is None:
-            raise ValueError("Could not get application instance.")
-
-        logger.info("Opening patient in Solteq Tand application...")
-        solteq_app.open_patient(get_context_values("cpr"))
+        # Open patient in Solteq Tand application
+        open_patient(get_context_values("cpr"))
 
         # Step 5
         # Journalize form document in Solteq
@@ -124,12 +118,12 @@ def process_udskrivning_22_aar(
         consent_udskrivning22aar_handler()
 
         # Update journalizing process status in RPA database
-        # update_process_status("Successful")
+        update_process_status("Successful")
     except BusinessError as be:
         logger.error("Business error occurred: %s", be)
-        # update_process_status("Failed")
+        update_process_status("Failed")
         raise be
     except Exception as e:
         logger.error("Application error occurred: %s", e)
-        # update_process_status("Failed")
+        update_process_status("Failed")
         raise e

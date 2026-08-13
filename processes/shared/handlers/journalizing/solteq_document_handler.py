@@ -3,16 +3,16 @@
 import logging
 import time
 
-from mbu_dev_shared_components.solteqtand.database import SolteqTandDatabase
+from mbu_solteqtand_shared_components.database.db_handler import SolteqTandDatabase
 
 from helpers.context_functions import get_context_values
 from helpers.credential_constants import get_rpa_constant
 from processes.application_handler import get_app
-
-# from processes.shared.handlers.journalizing.db_handler import (
-#     update_process_status,
-#     update_response_metadata,
-# )
+from processes.shared.handlers.journalizing.db_handler import (
+    update_process_status,
+    update_response_metadata,
+)
+from processes.shared.handlers.os2forms_handler import get_os2forms_document
 
 logger = logging.getLogger(__name__)
 
@@ -28,7 +28,6 @@ def journalize_document(document_type: str, document_file_name: str):
             raise ValueError("Could not get application instance.")
 
         solteq_db_conn = get_rpa_constant("srvapptmtsql03_connection_string")
-        full_path = get_context_values("os2forms_document_path")
 
         item_reference = get_context_values("reference")
 
@@ -47,6 +46,12 @@ def journalize_document(document_type: str, document_file_name: str):
         document_exists = solteq_db_obj.get_list_of_documents(filters=filters)
 
         if not document_exists:
+            # Only download the OS2 Forms document when it hasn't been
+            # journalized yet. On a rerun where the document already exists,
+            # we skip the download entirely.
+            get_os2forms_document()
+            full_path = get_context_values("os2forms_document_path")
+
             solteq_app.create_document(
                 document_full_path=full_path,
                 document_type=document_type,
@@ -63,14 +68,14 @@ def journalize_document(document_type: str, document_file_name: str):
                 raise RuntimeError("Document journalizing failed.")
 
         # Update journalizing response metadata in RPA database
-        # update_response_metadata(
-        #     step_name="Document", json_fragment={"DocumentCreated": True}
-        # )
+        update_response_metadata(
+            step_name="Document", json_fragment={"DocumentCreated": True}
+        )
         logger.info("Document journalized successfully.")
     except Exception as e:
-        # update_response_metadata(
-        #     step_name="Document", json_fragment={"DocumentCreated": False}
-        # )
-        # update_process_status("Failed")
+        update_response_metadata(
+            step_name="Document", json_fragment={"DocumentCreated": False}
+        )
+        update_process_status("Failed")
         logger.error("Error journalizing document: %s", e)
         raise RuntimeError("Error journalizing document: " + str(e)) from e

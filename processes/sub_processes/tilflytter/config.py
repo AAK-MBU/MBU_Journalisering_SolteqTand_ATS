@@ -10,7 +10,7 @@ DOCUMENT_TYPE = "Digital blanket"
 # Journal note handling settings
 # ----------------------
 ADM_NOTE_TYPE = "Administrativt notat"
-ADM_NOTE_MESSAGE = "'Tilflytter - Digital formular er udfyldt. Se Dokumenter'"
+ADM_NOTE_MESSAGE = "'Tilflytter - Digital formular er udfyldt. Kvittering sendt til patient. Se Dokumenter'"
 
 ADM_NOTE_CONSENT_TYPE = "Administrativt notat"
 ADM_NOTE_CONSENT_MESSAGE = "'Samtykke til at indhente journal fra tidligere tandklinik'"

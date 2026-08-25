@@ -16,3 +16,8 @@ ADM_NOTE_MESSAGE = "'Anmodning om at vende tilbage til kommunal tandpleje modtag
 # Event handling settings
 # ----------------------
 EVENT_MESSAGE = "Anmodning om kommunal tandpleje"
+
+# ----------------------
+# Dashboard settings
+# ----------------------
+DASHBOARD_ENABLED = False

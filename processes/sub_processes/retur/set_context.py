@@ -17,4 +17,5 @@ def set_context_vars(item_data: dict, item_reference: str, item_id: str):
         work_item=item_id,
         document_file_path=helper_config.DOCUMENT_PATH,
         document_file_name=config.DOCUMENT_FILE_NAME,
+        dashboard_enabled=config.DASHBOARD_ENABLED,
     )

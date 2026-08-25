@@ -3,7 +3,7 @@
 import logging
 
 from helpers.context_functions import get_context_values
-from processes.application_handler import get_app
+from processes.application_handler import get_app, open_patient
 from processes.shared.handlers.event_handler import create_event
 from processes.shared.handlers.journalizing.process_journalizing import (
     process_journalization_step,
@@ -37,13 +37,8 @@ def process_retur(item_data: dict, item_reference: str, item_id: str):
             item_data=item_data, item_reference=item_reference, item_id=item_id
         )
 
-        # Get the application instance
-        solteq_app = get_app()
-        if solteq_app is None:
-            raise ValueError("Could not get application instance.")
-
-        logger.info("Opening patient in Solteq Tand application...")
-        solteq_app.open_patient(get_context_values("cpr"))
+        # Open patient in Solteq Tand application
+        open_patient(get_context_values("cpr"))
 
         # Step 1: Journalize form document in Solteq
         # and create journal note linked to the receipt.

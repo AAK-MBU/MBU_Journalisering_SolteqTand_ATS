@@ -19,6 +19,25 @@ logger = logging.getLogger(__name__)
 
 CLIENT = ProcessDashboardClient(api_admin_token=os.environ.get("API_ADMIN_TOKEN"))
 
+_MISSING = object()
+
+
+def dashboard_enabled() -> bool:
+    """Whether the current subprocess reports to the process dashboard.
+
+    Driven by DASHBOARD_ENABLED in each sub_process's config.py, which
+    set_context_vars() copies into the run context as `dashboard_enabled`.
+    """
+    value = get_context_values("dashboard_enabled", _MISSING)
+
+    if value is _MISSING:
+        logger.warning(
+            "No 'dashboard_enabled' in context - treating dashboard as disabled. "
+        )
+        return False
+
+    return bool(value)
+
 
 def handle_process_dashboard(
     status: str,
@@ -29,6 +48,10 @@ def handle_process_dashboard(
     """
     Method for handling updating the process dashboard
     """
+    if not dashboard_enabled():
+        logger.info("Dashboard disabled for this subprocess; skipping update.")
+        return None, None
+
     try:
         client = CLIENT
 

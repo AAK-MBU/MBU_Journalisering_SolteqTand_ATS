@@ -144,8 +144,13 @@ def match_clinic():
     }
 
     try:
-        provider_number = get_context_values("clinic_provider_number")
-        phone_number = get_context_values("clinic_phone_number")
+        if get_context_values("clinic_provider_number") == "469378":
+            provider_number = "472034"
+            phone_number = "86124500"
+
+        else:
+            provider_number = get_context_values("clinic_provider_number")
+            phone_number = get_context_values("clinic_phone_number")
 
         logger.info(
             "Starting clinic lookup with provider_number: %s, phone_number: %s",

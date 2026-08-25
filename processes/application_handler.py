@@ -2,6 +2,7 @@
 
 import logging
 import subprocess as sp
+import time
 from subprocess import CalledProcessError
 
 from mbu_rpa_core.exceptions import BusinessError
@@ -15,6 +16,9 @@ from helpers import config
 from helpers.credential_constants import get_rpa_credentials
 
 logger = logging.getLogger(__name__)
+
+OPEN_PATIENT_ATTEMPTS = 3
+OPEN_PATIENT_RETRY_DELAY_SECONDS = 3
 
 APP: SolteqTandApp | None = None
 
@@ -38,6 +42,9 @@ def open_patient(cpr: str) -> SolteqTandApp:
     - ``NotMatchingError``: a patient was opened, but its CPR did not match
       the requested one.
 
+    Transient ``TimeoutError`` from the UI automation layer is retried up to
+    ``OPEN_PATIENT_ATTEMPTS`` times; business errors are not retried.
+
     Returns the application instance so callers can keep using it.
     """
     solteq_app = get_app()
@@ -45,16 +52,39 @@ def open_patient(cpr: str) -> SolteqTandApp:
         raise ValueError("Could not get application instance.")
 
     logger.info("Opening patient in Solteq Tand application...")
-    try:
-        solteq_app.open_patient(cpr)
-    except PatientNotFoundError as exc:
-        raise BusinessError(f"Patient med CPR {cpr} findes ikke i Solteq Tand") from exc
-    except NotMatchingError as exc:
-        raise BusinessError(
-            f"Opened patient's CPR did not match the requested CPR: {cpr}"
-        ) from exc
 
-    return solteq_app
+    last_timeout: TimeoutError | None = None
+
+    for attempt in range(1, OPEN_PATIENT_ATTEMPTS + 1):
+        try:
+            solteq_app.open_patient(cpr)
+        except PatientNotFoundError as exc:
+            raise BusinessError(
+                f"Patient med CPR {cpr} findes ikke i Solteq Tand"
+            ) from exc
+        except NotMatchingError as exc:
+            raise BusinessError(
+                f"Opened patient's CPR did not match the requested CPR: {cpr}"
+            ) from exc
+        except TimeoutError as exc:
+            last_timeout = exc
+            logger.warning(
+                "Timeout opening patient (attempt %d/%d): %s",
+                attempt,
+                OPEN_PATIENT_ATTEMPTS,
+                exc,
+            )
+            if attempt < OPEN_PATIENT_ATTEMPTS:
+                time.sleep(OPEN_PATIENT_RETRY_DELAY_SECONDS)
+            continue
+        else:
+            if attempt > 1:
+                logger.info("Patient opened successfully on attempt %d.", attempt)
+            return solteq_app
+
+    raise TimeoutError(
+        f"Could not open patient after {OPEN_PATIENT_ATTEMPTS} attempts: {last_timeout}"
+    ) from last_timeout
 
 
 def startup():

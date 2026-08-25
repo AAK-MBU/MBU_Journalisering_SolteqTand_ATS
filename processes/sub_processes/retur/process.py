@@ -3,7 +3,7 @@
 import logging
 
 from helpers.context_functions import get_context_values
-from processes.application_handler import get_app, open_patient
+from processes.application_handler import open_patient
 from processes.shared.handlers.event_handler import create_event
 from processes.shared.handlers.journalizing.process_journalizing import (
     process_journalization_step,

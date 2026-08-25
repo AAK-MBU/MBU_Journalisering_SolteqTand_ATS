@@ -16,6 +16,7 @@ from processes.shared.handlers.journalizing.process_journalizing import (
 )
 from processes.shared.handlers.solteq_contractor_handler import (
     check_extern_clinic_deal,
+    resolve_provider_number,
     validate_contractor,
 )
 from processes.shared.utils.clean_up import release_keys
@@ -114,7 +115,9 @@ def process_fritvalg(
         )
 
         check_extern_clinic_deal(
-            contractor_id=get_context_values("clinic_provider_number"),
+            contractor_id=resolve_provider_number(
+                get_context_values("clinic_provider_number")
+            ),
         )
 
         handle_process_dashboard(

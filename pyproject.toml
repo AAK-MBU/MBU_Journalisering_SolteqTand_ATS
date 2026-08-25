@@ -1,6 +1,6 @@
 [project]
 name = "mbu-journalisering-solteqtand-ats"
-version = "0.6.7"
+version = "0.6.8"
 
 description = "Journaliseringsmodul til Solteq Tand ATS"
 tags = ["ats"]
@@ -39,7 +39,7 @@ exclude = [
 ]
 
 [tool.ruff.lint]
-ignore = ["PLW0602", "PLW0603", "E501", "E251"]
+ignore = ["PLW0602", "PLW0603", "E501", "E251", "PLR0912"]
 select = [
   "F",    # Pyflakes
   "E",    # pycodestyle errors

@@ -14,6 +14,21 @@ from processes.shared.handlers.dashboard_data_handler import handle_process_dash
 logger = logging.getLogger(__name__)
 
 
+# Some contractors don't exist in Solteq under their real provider number,
+# so they are redirected to a stand-in clinic that does. The redirect must be
+# applied everywhere the provider number is used for a Solteq lookup (clinic
+# matching, extern clinic deal check, etc.).
+_PROVIDER_NUMBER_REDIRECTS = {
+    "469378": {"provider_number": "472034", "phone_number": "86124500"},
+}
+
+
+def resolve_provider_number(provider_number: str) -> str:
+    """Return the effective Solteq provider number, applying any redirect."""
+    redirect = _PROVIDER_NUMBER_REDIRECTS.get(provider_number)
+    return redirect["provider_number"] if redirect else provider_number
+
+
 def _all_same_values(clinics: list, fields: list) -> bool:
     """Return True if all clinics share identical values for every field in fields."""
     value_sets = {tuple(c.get(f) for f in fields) for c in clinics}
@@ -144,12 +159,13 @@ def match_clinic():
     }
 
     try:
-        if get_context_values("clinic_provider_number") == "469378":
-            provider_number = "472034"
-            phone_number = "86124500"
-
+        user_provider_number = get_context_values("clinic_provider_number")
+        redirect = _PROVIDER_NUMBER_REDIRECTS.get(user_provider_number)
+        if redirect:
+            provider_number = redirect["provider_number"]
+            phone_number = redirect["phone_number"]
         else:
-            provider_number = get_context_values("clinic_provider_number")
+            provider_number = user_provider_number
             phone_number = get_context_values("clinic_phone_number")
 
         logger.info(

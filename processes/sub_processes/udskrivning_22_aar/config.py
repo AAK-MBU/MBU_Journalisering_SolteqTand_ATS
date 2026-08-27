@@ -21,6 +21,7 @@ ADM_NOTE_NO_CONSENT_MESSAGE = "'Ikke samtykke til afsendelse af journalmateriale
 # ----------------------
 # Dashboard settings
 # ----------------------
+DASHBOARD_ENABLED = True
 DASHBOARD_PROCESS_NAME = "Udskrivning 22 år"
 DASHBOARD_STEP_4_NAME = "Formular indsendt"
 DASHBOARD_STEP_5_NAME = "Formular journaliseret"

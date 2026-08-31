@@ -44,7 +44,9 @@ def consent_tilflytter_handler() -> None:
 
     # Create administrative note in SolteqTand based on consent for fetching previous journal
     consent_treatment = get_context_values("treatment_consent")
-    if consent_treatment:
+    if consent_treatment is None:
+        logger.info("Treatment consent is None. Skipping journal note creation.")
+    elif consent_treatment is True:
         create_journalnote(
             journal_note_message=config.DIAGNOSE_NOTE_CONSENT_MESSAGE,
             checkmark_in_complete=False,
@@ -57,7 +59,7 @@ def consent_tilflytter_handler() -> None:
             sub_note_type=config.DIAGNOSE_SUB_NOTE_CONSENT_TYPE,
             checkmark_in_complete=True,
         )
-    elif not consent_treatment:
+    elif consent_treatment is False:
         create_journalnote(
             journal_note_message=config.DIAGNOSE_NOTE_NO_CONSENT_MESSAGE,
             checkmark_in_complete=True,
@@ -65,9 +67,10 @@ def consent_tilflytter_handler() -> None:
         )
     else:
         logger.error(
-            "Invalid value for treatment consent. Value must be True or False."
+            "Invalid value for treatment consent: %r. Must be True, False or None.",
+            consent_treatment,
         )
-        raise ValueError("Treatment consent must be True or False.")
+        raise ValueError("Treatment consent must be True, False or None.")
 
 
 def solteq_journal_update_handler(solteq_app: SolteqTandApp) -> None:

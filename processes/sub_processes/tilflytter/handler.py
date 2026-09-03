@@ -123,7 +123,7 @@ def solteq_journal_update_handler(solteq_app: SolteqTandApp) -> None:
         logger.info("Clinic name: %s", clinic_name)
 
         solteq_app.create_new_event(
-            clinic_name=clinic_name,
+            clinic_name="Tandplejen Aarhus - Kontaktcenter",
             event_text=config.EVENT_TEXT,
         )
     except Exception as e:

@@ -24,6 +24,7 @@ def _wait_for_journal_note(
     filters: dict,
     timeout: int = NOTE_VERIFY_TIMEOUT_SECONDS,
     poll_interval: int = NOTE_VERIFY_POLL_INTERVAL_SECONDS,
+    is_subnote: bool = False,
 ) -> list:
     """Poll the database until the journal note appears, or raise on timeout.
 
@@ -36,7 +37,10 @@ def _wait_for_journal_note(
 
     while True:
         attempt += 1
-        rows = solteq_db_obj.get_list_of_journal_notes(filters=filters)
+        if is_subnote:
+            rows = solteq_db_obj.get_list_of_sub_journal_notes(filters=filters)
+        else:
+            rows = solteq_db_obj.get_list_of_journal_notes(filters=filters)
         if rows:
             elapsed = time.monotonic() - started
             logger.info(
@@ -135,10 +139,12 @@ def create_sub_note(
 
         filters = {
             "p.cpr": get_context_values("cpr"),
-            "dn.Beskrivelse": journal_note_message_sql_lookup,
+            "ivn.Beskrivelse": journal_note_message_sql_lookup,
         }
 
-        journal_note_exists = solteq_db_obj.get_list_of_journal_notes(filters=filters)
+        journal_note_exists = solteq_db_obj.get_list_of_sub_journal_notes(
+            filters=filters
+        )
         if not journal_note_exists:
             solteq_app.create_journal_sub_note(
                 parent_note_message=parent_note_message,
@@ -146,12 +152,12 @@ def create_sub_note(
                 note_message=f"{sub_note_type} {sub_note_message}",
                 checkmark_in_complete=checkmark_in_complete,
             )
+
+            _wait_for_journal_note(
+                solteq_db_obj=solteq_db_obj, filters=filters, is_subnote=True
+            )
         else:
             logger.info("Journal sub note already exists. Skipping creation.")
-
-            time.sleep(3)  # Wait for the journal note to be created
-
-            _wait_for_journal_note(solteq_db_obj=solteq_db_obj, filters=filters)
 
         # Update journal note response metadata in RPA database
         update_response_metadata(

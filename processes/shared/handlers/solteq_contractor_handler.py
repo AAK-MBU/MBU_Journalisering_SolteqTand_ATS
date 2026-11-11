@@ -7,7 +7,10 @@ from mbu_solteqtand_shared_components.application import SolteqTandApp
 from mbu_solteqtand_shared_components.database.db_handler import SolteqTandDatabase
 
 from helpers.context_functions import get_context_values, set_context_values
-from helpers.credential_constants import get_rpa_constant
+from helpers.credential_constants import (
+    get_provider_number_redirect,
+    get_rpa_constant,
+)
 from processes.application_handler import get_app
 from processes.shared.handlers.dashboard_data_handler import handle_process_dashboard
 
@@ -15,18 +18,23 @@ logger = logging.getLogger(__name__)
 
 
 # Some contractors don't exist in Solteq under their real provider number,
-# so they are redirected to a stand-in clinic that does. The redirect must be
-# applied everywhere the provider number is used for a Solteq lookup (clinic
-# matching, extern clinic deal check, etc.).
-_PROVIDER_NUMBER_REDIRECTS = {
-    "469378": {"provider_number": "472034", "phone_number": "86124500"},
-}
+# so they are redirected to a stand-in clinic that does. Redirects live in
+# [RPA].[rpa].[ProviderNumberRedirects] (managed via automation-hub) and must
+# be applied everywhere the provider number is used for a Solteq lookup
+# (clinic matching, extern clinic deal check, etc.).
 
 
 def resolve_provider_number(provider_number: str) -> str:
     """Return the effective Solteq provider number, applying any redirect."""
-    redirect = _PROVIDER_NUMBER_REDIRECTS.get(provider_number)
-    return redirect["provider_number"] if redirect else provider_number
+    redirect = get_provider_number_redirect(provider_number)
+    if redirect:
+        logger.info(
+            "Provider number %s redirected to %s.",
+            provider_number,
+            redirect["provider_number"],
+        )
+        return redirect["provider_number"]
+    return provider_number
 
 
 def _all_same_values(clinics: list, fields: list) -> bool:
@@ -158,15 +166,28 @@ def match_clinic():
         "error": None,
     }
 
+    user_provider_number = get_context_values("clinic_provider_number")
+    user_phone_number = get_context_values("clinic_phone_number")
+
+    # Looked up outside the try below on purpose: a failing redirect lookup is
+    # an infrastructure error and must surface as a process error, not be
+    # turned into a "no clinic found" business error.
+    redirect = get_provider_number_redirect(user_provider_number)
+
     try:
-        user_provider_number = get_context_values("clinic_provider_number")
-        redirect = _PROVIDER_NUMBER_REDIRECTS.get(user_provider_number)
         if redirect:
             provider_number = redirect["provider_number"]
-            phone_number = redirect["phone_number"]
+            # NULL target phone in the table means: keep the citizen's phone.
+            phone_number = redirect["phone_number"] or user_phone_number
+            logger.info(
+                "Provider number %s redirected to %s (phone: %s).",
+                user_provider_number,
+                provider_number,
+                phone_number,
+            )
         else:
             provider_number = user_provider_number
-            phone_number = get_context_values("clinic_phone_number")
+            phone_number = user_phone_number
 
         logger.info(
             "Starting clinic lookup with provider_number: %s, phone_number: %s",

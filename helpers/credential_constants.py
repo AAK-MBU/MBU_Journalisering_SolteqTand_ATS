@@ -35,6 +35,49 @@ def get_rpa_credentials(credential_name: str) -> dict[str, Any]:
         return rpa_conn.get_credential(credential_name)
 
 
+_PROVIDER_NUMBER_REDIRECT_QUERY = """
+    SELECT [target_provider_number], [target_phone_number]
+    FROM [RPA].[rpa].[ProviderNumberRedirects]
+    WHERE [source_provider_number] = ? AND [is_active] = 1
+"""
+
+
+def get_provider_number_redirect(provider_number: str | None) -> dict | None:
+    """
+    Look up an active provider number (ydernummer) redirect in the RPA database.
+
+    Some contractors don't exist in Solteq under their real provider number,
+    so they are redirected to a stand-in clinic that does. Redirects are
+    maintained in [RPA].[rpa].[ProviderNumberRedirects] (managed via
+    automation-hub). At most one active redirect exists per source number.
+
+    Args:
+        provider_number (str | None): The provider number entered by the citizen.
+
+    Returns:
+        dict | None: {"provider_number": str, "phone_number": str | None} for the
+        stand-in clinic, or None if no active redirect exists.
+        phone_number None means: keep the citizen's phone number.
+    """
+    provider_number = (provider_number or "").strip()
+    if not provider_number:
+        return None
+
+    with RPAConnection(db_env="PROD", commit=False) as rpa_conn:
+        rows = rpa_conn.execute_query(
+            _PROVIDER_NUMBER_REDIRECT_QUERY, [provider_number], return_dict=True
+        )
+
+    if not rows:
+        return None
+
+    row = rows[0]
+    return {
+        "provider_number": row["target_provider_number"],
+        "phone_number": row["target_phone_number"],
+    }
+
+
 def get_exceptions(db_connection: str) -> list[dict]:
     """Get exceptions from the database."""
     conn = pyodbc.connect(db_connection)

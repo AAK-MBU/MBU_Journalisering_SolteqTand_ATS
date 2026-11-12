@@ -38,18 +38,28 @@ def get_rpa_credentials(credential_name: str) -> dict[str, Any]:
 _PROVIDER_NUMBER_REDIRECT_QUERY = """
     SELECT [target_provider_number], [target_phone_number]
     FROM [RPA].[rpa].[ProviderNumberRedirects]
-    WHERE [source_provider_number] = ? AND [is_active] = 1
+    WHERE [source_provider_number] = ?
+      AND [scope] = N'SOLTEQ'
+      AND [is_active] = 1
 """
 
 
 def get_provider_number_redirect(provider_number: str | None) -> dict | None:
     """
-    Look up an active provider number (ydernummer) redirect in the RPA database.
+    Look up an active SOLTEQ-scoped provider number (ydernummer) redirect in
+    the RPA database.
 
     Some contractors don't exist in Solteq under their real provider number,
     so they are redirected to a stand-in clinic that does. Redirects are
     maintained in [RPA].[rpa].[ProviderNumberRedirects] (managed via
-    automation-hub). At most one active redirect exists per source number.
+    automation-hub). At most one active redirect exists per source number
+    and scope.
+
+    Only scope 'SOLTEQ' applies here. 'EDI' rows (clinics that exist in
+    Solteq but are reached via another recipient in the EDI portal) are
+    handled by downstream processes and must NOT affect the Solteq lookup.
+    A SOLTEQ redirect implicitly covers EDI too, since the stand-in clinic
+    is what gets set on the patient.
 
     Args:
         provider_number (str | None): The provider number entered by the citizen.

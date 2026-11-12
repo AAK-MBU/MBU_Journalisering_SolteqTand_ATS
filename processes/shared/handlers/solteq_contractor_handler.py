@@ -8,6 +8,7 @@ from mbu_solteqtand_shared_components.database.db_handler import SolteqTandDatab
 
 from helpers.context_functions import get_context_values, set_context_values
 from helpers.credential_constants import (
+    get_edi_redirect,
     get_provider_number_redirect,
     get_rpa_constant,
 )
@@ -257,14 +258,40 @@ def _check_clinic_in_edi_portal(
 ) -> None:
     """Open EDI portal and verify the matched clinic's contractor ID and phone number.
 
+    If the matched clinic has an active EDI redirect (clinic exists in Solteq,
+    but is reached via a shared recipient in the EDI portal), the redirected
+    recipient is checked instead. The clinic set on the patient in Solteq is
+    not affected.
+
     Raises:
         BusinessError: If the clinic is not found or its phone number doesn't match.
     """
+    solteq_contractor_id = matched_clinic.get("contractorId", "")
+    solteq_phone_number = matched_clinic.get("phoneNumber", "")
+
+    # Looked up before opening the portal: a failing lookup is an
+    # infrastructure error and must not fall back to the clinic's own number.
+    edi_redirect = get_edi_redirect(solteq_contractor_id)
+    if edi_redirect:
+        contractor_id = edi_redirect["provider_number"]
+        # NULL target phone in the table means: keep the clinic's own phone.
+        phone_number = edi_redirect["phone_number"] or solteq_phone_number
+        logger.info(
+            "EDI redirect for contractor %s: checking recipient %s (phone: %s) in EDI portal.",
+            solteq_contractor_id,
+            contractor_id,
+            phone_number,
+        )
+        redirect_info = (
+            f" (EDI-modtager for klinikken med ydernummer '{solteq_contractor_id}')"
+        )
+    else:
+        contractor_id = solteq_contractor_id
+        phone_number = solteq_phone_number
+        redirect_info = ""
+
     solteq_app.open_edi_portal()
     try:
-        contractor_id = matched_clinic.get("contractorId", "")
-        phone_number = matched_clinic.get("phoneNumber", "")
-
         extern_clinic_data = [
             {"contractorId": contractor_id, "phoneNumber": phone_number}
         ]
@@ -280,7 +307,7 @@ def _check_clinic_in_edi_portal(
         if result["rowCount"] == 0:
             logger.warning("Matched clinic not found in EDI portal.")
             raise BusinessError(
-                f"Fandt ikke ydernummer '{contractor_id}' i EDI Portalen. "
+                f"Fandt ikke ydernummer '{contractor_id}'{redirect_info} i EDI Portalen. "
                 f"{user_info}. "
                 "Kontakt Tandplejens administration, tandplejen@mbu.aarhus.dk."
             )
@@ -288,11 +315,21 @@ def _check_clinic_in_edi_portal(
         if not result["isPhoneNumberMatch"]:
             logger.warning("Matched clinic phone number does not match EDI portal.")
             edi_phone_numbers = ", ".join(result.get("ediPhoneNumbers", []))
+            if edi_redirect:
+                message = (
+                    f"Ydernummer '{contractor_id}'{redirect_info} "
+                    f"forventes at have telefonnummer '{phone_number}', hvilket ikke "
+                    f"matcher telefonnummer i EDI Portalen som er '{edi_phone_numbers}'. "
+                )
+            else:
+                message = (
+                    f"Valgt klinik med ydernummer '{contractor_id}' står i Solteq med "
+                    f"telefonnummer '{phone_number}', hvilket ikke matcher telefonnummer "
+                    f"i EDI Portalen som er '{edi_phone_numbers}'. "
+                )
             raise BusinessError(
-                f"Valgt klinik med ydernummer '{contractor_id}' står i Solteq med "
-                f"telefonnummer '{phone_number}', hvilket ikke matcher telefonnummer "
-                f"i EDI Portalen som er '{edi_phone_numbers}'. "
-                "Kontakt Tandplejens administration, tandplejen@mbu.aarhus.dk."
+                message
+                + "Kontakt Tandplejens administration, tandplejen@mbu.aarhus.dk."
             )
 
         logger.info("Matched clinic verified in EDI portal.")

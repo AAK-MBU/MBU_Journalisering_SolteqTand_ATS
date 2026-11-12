@@ -88,6 +88,53 @@ def get_provider_number_redirect(provider_number: str | None) -> dict | None:
     }
 
 
+_EDI_REDIRECT_QUERY = """
+    SELECT [target_provider_number], [target_phone_number]
+    FROM [RPA].[rpa].[ProviderNumberRedirects]
+    WHERE [source_provider_number] = ?
+      AND [scope] = N'EDI'
+      AND [is_active] = 1
+"""
+
+
+def get_edi_redirect(contractor_id: str | None) -> dict | None:
+    """
+    Look up an active EDI-scoped redirect in the RPA database.
+
+    Some clinics exist in Solteq under their own provider number, but are
+    reached through a shared recipient in the EDI portal (e.g. Hasle Torv and
+    Brobjergparken -> 485055). The clinic set on the patient in Solteq stays
+    the real one; only EDI portal lookups use the redirected recipient. The
+    downstream EDI sending processes apply the same redirect.
+
+    Args:
+        contractor_id (str | None): The matched clinic's provider number in Solteq
+            (i.e. after any SOLTEQ redirect).
+
+    Returns:
+        dict | None: {"provider_number": str, "phone_number": str | None} for the
+        EDI recipient, or None if no active EDI redirect exists.
+        phone_number None means: keep the clinic's own phone number.
+    """
+    contractor_id = (contractor_id or "").strip()
+    if not contractor_id:
+        return None
+
+    with RPAConnection(db_env="PROD", commit=False) as rpa_conn:
+        rows = rpa_conn.execute_query(
+            _EDI_REDIRECT_QUERY, [contractor_id], return_dict=True
+        )
+
+    if not rows:
+        return None
+
+    row = rows[0]
+    return {
+        "provider_number": row["target_provider_number"],
+        "phone_number": row["target_phone_number"],
+    }
+
+
 def get_exceptions(db_connection: str) -> list[dict]:
     """Get exceptions from the database."""
     conn = pyodbc.connect(db_connection)
